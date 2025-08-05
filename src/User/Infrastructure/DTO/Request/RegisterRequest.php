@@ -1,16 +1,15 @@
 <?php
 namespace App\User\Infrastructure\DTO\Request;
 
-use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class RegisterRequest
 {
-    #[Assert\NotBlank(message: 'Email je povinný')]
-    #[Assert\Email(message: 'Neplatný formát emailu')]
-    #[Assert\Length(max: 180, maxMessage: 'Email je příliš dlouhý')]
+    #[NotBlank()]
+    #[Email()]
     public string $email;
 
-    #[Assert\NotBlank(message: 'Heslo je povinné')]
-    #[Assert\Length(min: 8, minMessage: 'Heslo musí mít alespoň 8 znaků')]
+    #[NotBlank()]
     public string $password;
 }

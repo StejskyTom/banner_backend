@@ -3,6 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\User;
+use App\Entity\Widget;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -23,6 +24,11 @@ class AppFixtures extends Fixture
         $user->setRoles(['ROLE_USER']);
         $password = $this->hasher->hashPassword($user, 'test');
         $user->setPassword($password);
+
+        for ($i = 0; $i < 5; $i++) {
+            $widget = new Widget($user, 'Widget ' . $i);
+            $manager->persist($widget);
+        }
 
         $manager->persist($user);
         $manager->flush();
