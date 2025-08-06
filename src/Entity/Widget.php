@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\WidgetRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: WidgetRepository::class)]
@@ -14,10 +15,12 @@ class Widget
     #[ORM\Column(type: UuidType::NAME)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
+    #[Groups(['widget:read'])]
     private ?Uuid $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $title = null;
+    #[Groups(['widget:read'])]
+    private ?string $title;
 
     #[ORM\ManyToOne(inversedBy: 'widgets')]
     #[ORM\JoinColumn(nullable: false)]
@@ -25,7 +28,7 @@ class Widget
 
     public function __construct(
         User $user,
-        string $title = '',
+        ?string $title = null,
     )
     {
         $this->user = $user;
