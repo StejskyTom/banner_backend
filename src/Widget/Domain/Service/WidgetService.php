@@ -16,7 +16,7 @@ class WidgetService
     /**
      * @throws WidgetNotFound
      */
-    public function updateWidget(string $id, ?string $title = null): Widget
+    public function updateWidget(string $id, ?string $title = null, array $logos = []): Widget
     {
         $widget = $this->widgetRepository->findOneBy(['id' => $id]);
 
@@ -25,6 +25,7 @@ class WidgetService
         }
 
         $widget->setTitle($title);
+        $widget->setLogos($logos);
 
         return $widget;
     }

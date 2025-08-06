@@ -26,7 +26,8 @@ readonly class UpdateWidgetHandler
         try {
             $widget = $this->widgetService->updateWidget(
                 $action->id,
-                $action->title
+                $action->title,
+                $action->logos
             );
 
             $this->logger->info('Widget byl úspěšně uložen', [

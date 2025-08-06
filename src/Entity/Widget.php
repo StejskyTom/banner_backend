@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\WidgetRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Serializer\Attribute\Groups;
@@ -25,6 +26,10 @@ class Widget
     #[ORM\ManyToOne(inversedBy: 'widgets')]
     #[ORM\JoinColumn(nullable: false)]
     private User $user;
+
+    #[ORM\Column(type: Types::JSON)]
+    #[Groups(['widget:read'])]
+    private array $logos = [];
 
     public function __construct(
         User $user,
@@ -58,5 +63,34 @@ class Widget
     public function setUser(?User $user): void
     {
         $this->user = $user;
+    }
+
+    public function getLogos(): array
+    {
+        return $this->logos;
+    }
+
+    public function setLogos(array $logos): static
+    {
+        $this->logos = $logos;
+        return $this;
+    }
+
+    public function addLogo(string $logoUrl): static
+    {
+        if (!in_array($logoUrl, $this->logos)) {
+            $this->logos[] = $logoUrl;
+        }
+        return $this;
+    }
+
+    public function removeLogo(string $logoUrl): static
+    {
+        $key = array_search($logoUrl, $this->logos);
+        if ($key !== false) {
+            unset($this->logos[$key]);
+            $this->logos = array_values($this->logos); // reindexování
+        }
+        return $this;
     }
 }

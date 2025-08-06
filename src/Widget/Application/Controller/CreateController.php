@@ -27,6 +27,7 @@ class CreateController extends AbstractController
 
     public function __construct(
         MessageBusInterface $messageBus,
+        private WidgetRepository $widgetRepository,
     )
     {
         $this->messageBus = $messageBus;
@@ -54,8 +55,27 @@ class CreateController extends AbstractController
             'message' => 'Widget byl úspěšně aktualizován',
             'id' => $widget->getId(),
             'title' => $widget->getTitle(),
-            'logos' => $data['logos'] ?? []
+            'logos' => $widget->getLogos(),
         ]);
+    }
+
+    #[Route('/widget/{widgetId}/embed.js', name: 'widget_embed')]
+    public function generateWidgetJS(string $widgetId): Response
+    {
+        $widget = $this->widgetRepository->find($widgetId);
+        $logos = $widget->getLogos();
+
+        $jsTemplate = $this->renderView('embed.js.twig', [
+            'widgetId' => $widgetId,
+            'logos' => $logos,
+        ]);
+
+        $response = new Response($jsTemplate);
+        $response->headers->set('Content-Type', 'application/javascript');
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Cache-Control', 'public, max-age=300'); // 5min cache
+
+        return $response;
     }
 
 }

@@ -1,0 +1,135 @@
+// Template (embed.js.twig) - řešení pro malý počet log
+(function() {
+    'use strict';
+
+    // Konfigurace widgetu
+    const config = {{ logos|json_encode|raw }};
+    const widgetId = '{{ widgetId }}';
+
+    // Najdeme aktuální script tag
+    const currentScript = document.currentScript ||
+        (function() {
+            const scripts = document.getElementsByTagName('script');
+            return scripts[scripts.length - 1];
+        })();
+
+    // Vytvoříme container přímo na místě scriptu
+    const widgetContainer = document.createElement('div');
+    widgetContainer.id = 'widget-' + widgetId + '-' + Date.now();
+    widgetContainer.className = 'logo-carousel-widget';
+
+    // Vložíme container před script tag
+    currentScript.parentNode.insertBefore(widgetContainer, currentScript);
+
+    // CSS styly
+    const styles = `
+        .logo-carousel-widget {
+            overflow: hidden;
+            width: 100%;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px 0;
+            margin: 10px 0;
+            position: relative;
+        }
+        .logo-carousel-track {
+            display: flex;
+            align-items: center;
+            animation: logoScroll 60s linear infinite;
+            white-space: nowrap;
+            width: max-content;
+        }
+        .logo-carousel-item {
+            height: 50px;
+            margin: 0 40px;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+            flex-shrink: 0;
+            display: block;
+        }
+        .logo-carousel-item:hover {
+            opacity: 1;
+        }
+
+        @keyframes logoScroll {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .logo-carousel-item {
+                height: 35px;
+                margin: 0 25px;
+            }
+            .logo-carousel-track {
+                animation-duration: 45s;
+            }
+        }
+    `;
+
+    // Přidáme CSS do hlavičky
+    if (!document.getElementById('widget-styles-' + widgetId)) {
+        const styleSheet = document.createElement('style');
+        styleSheet.id = 'widget-styles-' + widgetId;
+        styleSheet.textContent = styles;
+        document.head.appendChild(styleSheet);
+    }
+
+    // Vytvoříme HTML obsah
+    function renderWidget() {
+        const logos = config || [];
+
+        if (logos.length === 0) {
+            widgetContainer.innerHTML = '<p style="text-align: center; color: #666;">Žádná loga k zobrazení</p>';
+            return;
+        }
+
+        // KLÍČOVÁ LOGIKA: Vypočítáme kolik duplikací potřebujeme
+        const containerWidth = window.innerWidth; // šířka obrazovky
+        const estimatedLogoWidth = 130; // 50px logo + 2×40px margin
+        const logosPerScreen = Math.ceil(containerWidth / estimatedLogoWidth);
+        const totalLogosNeeded = Math.max(logosPerScreen * 3, logos.length * 2); // minimálně 3× šířka obrazovky
+
+        // Duplikujeme loga dokud nemáme dostatek
+        let duplicatedLogos = [];
+        const repetitions = Math.ceil(totalLogosNeeded / logos.length);
+
+        for (let i = 0; i < repetitions; i++) {
+            duplicatedLogos.push(...logos);
+        }
+
+        // Zajistíme, že máme sudý počet sad (pro animaci -50%)
+        if (repetitions % 2 !== 0) {
+            duplicatedLogos.push(...logos);
+        }
+
+        const trackHTML = duplicatedLogos.map(logo => `
+            <img src="${logo}"
+                 alt=""
+                 class="logo-carousel-item"
+                 loading="lazy"
+            >
+        `).join('');
+
+        widgetContainer.innerHTML = `
+            <div class="logo-carousel-track">
+                ${trackHTML}
+            </div>
+        `;
+    }
+
+    // Renderujeme widget
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderWidget);
+    } else {
+        renderWidget();
+    }
+
+    // Re-render při změně velikosti okna
+    window.addEventListener('resize', renderWidget);
+
+})();
