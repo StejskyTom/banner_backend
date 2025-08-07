@@ -67,6 +67,7 @@ class CreateController extends AbstractController
 
         $jsTemplate = $this->renderView('embed.js.twig', [
             'widgetId' => $widgetId,
+            'title' => $widget->getTitle(),
             'logos' => $logos,
         ]);
 

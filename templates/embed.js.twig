@@ -5,6 +5,8 @@
     // Konfigurace widgetu
     const config = {{ logos|json_encode|raw }};
     const widgetId = '{{ widgetId }}';
+    const widgetTitle = "{{ title }}";
+
 
     // Najdeme aktuální script tag
     const currentScript = document.currentScript ||
@@ -49,6 +51,9 @@
         }
         .logo-carousel-item:hover {
             opacity: 1;
+        }
+        .text-align-center {
+            text-align: center;
         }
 
         @keyframes logoScroll {
@@ -116,6 +121,7 @@
         `).join('');
 
         widgetContainer.innerHTML = `
+            <h2 class="text-align-center">${widgetTitle}</h2>
             <div class="logo-carousel-track">
                 ${trackHTML}
             </div>
