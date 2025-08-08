@@ -2,6 +2,7 @@
 namespace App\Widget\Domain\Service;
 
 use App\Entity\Widget;
+use App\Repository\AttachmentRepository;
 use App\Repository\WidgetRepository;
 use App\User\Domain\Exception\InvalidEmailException;
 use App\User\Domain\Exception\UserAlreadyExistsException;
@@ -11,12 +12,13 @@ class WidgetService
 {
     public function __construct(
         private WidgetRepository $widgetRepository,
+        private AttachmentRepository $attachmentRepository,
     ) {}
 
     /**
      * @throws WidgetNotFound
      */
-    public function updateWidget(string $id, ?string $title = null, array $logos = []): Widget
+    public function updateWidget(string $id, ?string $title = null, array $attachmentsOrder = []): Widget
     {
         $widget = $this->widgetRepository->findOneBy(['id' => $id]);
 
@@ -25,7 +27,13 @@ class WidgetService
         }
 
         $widget->setTitle($title);
-        $widget->setLogos($logos);
+        foreach ($attachmentsOrder as $pos => $attId) {
+            $att = $this->attachmentRepository->find($attId);
+            if ($att && $att->getWidget() === $widget) {
+                $att->setPosition($pos);
+            }
+        }
+
 
         return $widget;
     }

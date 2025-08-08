@@ -28,11 +28,6 @@ class AppFixtures extends Fixture
         for ($i = 0; $i < 5; $i++) {
             $widget = new Widget($user, 'Widget ' . $i);
             $manager->persist($widget);
-            $widget->setLogos([
-                "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1150px-React-icon.svg.png",
-                "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Unofficial_JavaScript_logo_2.svg/1200px-Unofficial_JavaScript_logo_2.svg.png",
-                "https://w7.pngwing.com/pngs/585/802/png-transparent-symfony-full-logo-tech-companies-thumbnail.png"
-            ]);
         }
 
         $manager->persist($user);

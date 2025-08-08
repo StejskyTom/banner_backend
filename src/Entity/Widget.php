@@ -3,8 +3,10 @@
 namespace App\Entity;
 
 use App\Repository\WidgetRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use phpDocumentor\Reflection\Types\Collection;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Uid\Uuid;
@@ -27,9 +29,10 @@ class Widget
     #[ORM\JoinColumn(nullable: false)]
     private User $user;
 
-    #[ORM\Column(type: Types::JSON)]
+    #[ORM\OneToMany(targetEntity: Attachment::class, mappedBy: 'widget', cascade: ['persist','remove'], orphanRemoval: true)]
+    #[ORM\OrderBy(['position' => 'ASC'])]
     #[Groups(['widget:read'])]
-    private array $logos = [];
+    private $attachments;
 
     public function __construct(
         User $user,
@@ -38,6 +41,7 @@ class Widget
     {
         $this->user = $user;
         $this->title = $title;
+        $this->attachments = new ArrayCollection();
     }
 
     public function getId(): ?Uuid
@@ -65,32 +69,22 @@ class Widget
         $this->user = $user;
     }
 
-    public function getLogos(): array
+    /** @return Attachment[] */
+    public function getAttachments(): array
     {
-        return $this->logos;
+        return $this->attachments->toArray();
     }
 
-    public function setLogos(array $logos): static
+    public function addAttachment(Attachment $a): void
     {
-        $this->logos = $logos;
-        return $this;
-    }
-
-    public function addLogo(string $logoUrl): static
-    {
-        if (!in_array($logoUrl, $this->logos)) {
-            $this->logos[] = $logoUrl;
+        if (!$this->attachments->contains($a)) {
+            $this->attachments->add($a);
+            $a->setWidget($this);
         }
-        return $this;
     }
 
-    public function removeLogo(string $logoUrl): static
+    public function removeAttachment(Attachment $a): void
     {
-        $key = array_search($logoUrl, $this->logos);
-        if ($key !== false) {
-            unset($this->logos[$key]);
-            $this->logos = array_values($this->logos); // reindexování
-        }
-        return $this;
+        $this->attachments->removeElement($a);
     }
 }

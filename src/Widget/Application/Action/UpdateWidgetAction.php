@@ -11,7 +11,7 @@ final readonly class UpdateWidgetAction
     public function __construct(
         public string $id,
         public string $title,
-        public array $logos,
+        public array $attachmentsOrder,
     ) {
     }
 }

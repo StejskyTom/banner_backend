@@ -3,7 +3,7 @@
     'use strict';
 
     // Konfigurace widgetu
-    const config = {{ logos|json_encode|raw }};
+    const config = {{ attachments|raw }};
     const widgetId = '{{ widgetId }}';
     const widgetTitle = "{{ title }}";
 
@@ -113,7 +113,7 @@
         }
 
         const trackHTML = duplicatedLogos.map(logo => `
-            <img src="${logo}"
+            <img src="${logo.url}"
                  alt=""
                  class="logo-carousel-item"
                  loading="lazy"
