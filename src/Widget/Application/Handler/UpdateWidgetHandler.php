@@ -27,7 +27,9 @@ readonly class UpdateWidgetHandler
             $widget = $this->widgetService->updateWidget(
                 $action->id,
                 $action->title,
-                $action->attachmentsOrder
+                $action->attachmentsOrder,
+                $action->imageSize,
+                $action->speed
             );
 
             $this->logger->info('Widget byl úspěšně uložen', [

@@ -25,6 +25,14 @@ class Widget
     #[Groups(['widget:read'])]
     private ?string $title;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['widget:read'])]
+    private ?int $imageSize = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['widget:read'])]
+    private ?int $speed = null;
+
     #[ORM\ManyToOne(inversedBy: 'widgets')]
     #[ORM\JoinColumn(nullable: false)]
     private User $user;
@@ -86,5 +94,25 @@ class Widget
     public function removeAttachment(Attachment $a): void
     {
         $this->attachments->removeElement($a);
+    }
+
+    public function getImageSize(): ?int
+    {
+        return $this->imageSize;
+    }
+
+    public function setImageSize(?int $imageSize): void
+    {
+        $this->imageSize = $imageSize;
+    }
+
+    public function getSpeed(): ?int
+    {
+        return $this->speed;
+    }
+
+    public function setSpeed(?int $speed): void
+    {
+        $this->speed = $speed;
     }
 }

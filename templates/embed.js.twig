@@ -1,102 +1,93 @@
-// Template (embed.js.twig) - řešení pro malý počet log
 (function() {
     'use strict';
 
-    // Konfigurace widgetu
-    const config = {{ attachments|raw }};
+    const logos = {{ attachments|raw }};
     const widgetId = '{{ widgetId }}';
     const widgetTitle = "{{ title }}";
 
+    // Použij hodnoty z entity nebo default
+    const speed = '{{ speed ?: 25 }}s';
+    const imgHeight = '{{ imageSize ?: 64 }}px';
+    const imgMaxWidth = '120px';
+    const itemGap = '32px';
+    const maskLeft = '128px';
+    const maskRight = '200px';
+    const bg = '#ffffff';
+    const fg = '#171717';
 
-    // Najdeme aktuální script tag
     const currentScript = document.currentScript ||
         (function() {
             const scripts = document.getElementsByTagName('script');
             return scripts[scripts.length - 1];
         })();
 
-    // Vytvoříme container přímo na místě scriptu
     const widgetContainer = document.createElement('div');
     widgetContainer.id = 'widget-' + widgetId + '-' + Date.now();
     widgetContainer.className = 'logo-carousel-widget';
-
-    // Vložíme container před script tag
     currentScript.parentNode.insertBefore(widgetContainer, currentScript);
 
-    // CSS styly
     const styles = `
-        :root{
-    --bg:#ffffff;
-    --fg:#171717;
-    --item-gap: 32px;         /* mezera mezi logy */
-    --img-h: 64px;            /* výška log */
-    --img-max-w:120px;        /* max šířka log */
-    --speed:25s;              /* rychlost posuvu (nižší = rychlejší) */
-    --mask-left:128px;        /* šířka levého fade okraje */
-    --mask-right:200px;       /* šířka pravého fade okraje */
-  }
-  @media (prefers-color-scheme: dark){
-    :root { --bg:#0a0a0a; --fg:#ededed; }
-  }
-  body{
-    margin:0; padding:24px;
-    background:var(--bg);
-    color:var(--fg);
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-  }
-
-  .logo-carousel{
-    width:100%;
-    margin: 0 auto;
-    overflow:hidden;
-    position: relative;
-    /* fade okraje – podpora pro moderní i Safari */
-    mask-image: linear-gradient(to right, transparent 0, #000 var(--mask-left), #000 calc(100% - var(--mask-right)), transparent 100%);
-    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--mask-left), #000 calc(100% - var(--mask-right)), transparent 100%);
-  }
-
-  .logo-strip{
-    display:flex;
-    align-items:center;
-    list-style:none;
-    padding:0;
-    margin:0;
-    gap: var(--item-gap);
-    width:max-content;
-    animation: scroll var(--speed) linear infinite;
-  }
-
-  .logo-strip li { flex-shrink: 0 0 auto; }
-  .logo-strip img{
-    height:var(--img-h);
-    max-width:var(--img-max-w);
-    object-fit:contain;
-    display:block;
-    opacity:.85;
-    transition: opacity .2s ease;
-  }
-  .logo-strip img:hover{ opacity:1; }
-
-  /* nekonečný pohyb */
-  @keyframes scroll{
-    from { transform: translateX(0); }
-    to   { transform: translateX(-50%); }
-  }
-
-  /* Na menších displejích lehce zrychlíme a zmenšíme loga */
-  @media (max-width:768px){
-    :root{ --img-h: 48px; --item-gap: 24px; --speed: 20s; }
-  }
-
-  h2{
-    text-align:center;
-    font-size: clamp(1.125rem, 2vw, 1.5rem);
-    margin: 0 0 12px;
-    font-weight: 700;
-  }
+        :root {
+            --bg: ${bg};
+            --fg: ${fg};
+            --item-gap: ${itemGap};
+            --img-h: ${imgHeight};
+            --img-max-w: ${imgMaxWidth};
+            --speed: ${speed};
+            --mask-left: ${maskLeft};
+            --mask-right: ${maskRight};
+        }
+        @media (prefers-color-scheme: dark){
+            :root { --bg:#0a0a0a; --fg:#ededed; }
+        }
+        body{
+            margin:0; padding:24px;
+            background:var(--bg);
+            color:var(--fg);
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        }
+        .logo-carousel{
+            width:100%;
+            margin: 0 auto;
+            overflow:hidden;
+            position: relative;
+            mask-image: linear-gradient(to right, transparent 0, #000 var(--mask-left), #000 calc(100% - var(--mask-right)), transparent 100%);
+            -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--mask-left), #000 calc(100% - var(--mask-right)), transparent 100%);
+        }
+        .logo-strip{
+            display:flex;
+            align-items:center;
+            list-style:none;
+            padding:0;
+            margin:0;
+            gap: var(--item-gap);
+            width:max-content;
+            animation: scroll var(--speed) linear infinite;
+        }
+        .logo-strip img{
+            height:var(--img-h);
+            max-width:var(--img-max-w);
+            object-fit:contain;
+            display:block;
+            opacity:.85;
+            transition: opacity .2s ease;
+        }
+        .logo-strip img:hover{ opacity:1; }
+        @keyframes scroll{
+            from { transform: translateX(0); }
+            to   { transform: translateX(-50%); }
+        }
+        @media (max-width:768px){
+            :root{ --img-h: 48px; --item-gap: 24px; --speed: 20s; }
+        }
+        h2{
+            text-align:center;
+            font-size: clamp(1.125rem, 2vw, 1.5rem);
+            margin: 0 0 12px;
+            font-weight: 700;
+        }
     `;
 
-    // Přidáme CSS do hlavičky
     if (!document.getElementById('widget-styles-' + widgetId)) {
         const styleSheet = document.createElement('style');
         styleSheet.id = 'widget-styles-' + widgetId;
@@ -104,44 +95,31 @@
         document.head.appendChild(styleSheet);
     }
 
-    // Vytvoříme HTML obsah
     function renderWidget() {
-        const logos = config || [];
-
-        if (logos.length === 0) {
+        if (!logos || logos.length === 0) {
             widgetContainer.innerHTML = '<p style="text-align: center; color: #666;">Žádná loga k zobrazení</p>';
             return;
         }
 
-        // KLÍČOVÁ LOGIKA: Vypočítáme kolik duplikací potřebujeme
-        const containerWidth = window.innerWidth; // šířka obrazovky
-        const estimatedLogoWidth = 130; // 50px logo + 2×40px margin
+        const containerWidth = window.innerWidth;
+        const estimatedLogoWidth = parseInt(imgMaxWidth) + parseInt(itemGap);
         const logosPerScreen = Math.ceil(containerWidth / estimatedLogoWidth);
-        const totalLogosNeeded = Math.max(logosPerScreen * 3, logos.length * 2); // minimálně 3× šířka obrazovky
+        const totalLogosNeeded = Math.max(logosPerScreen * 3, logos.length * 2);
 
-        // Duplikujeme loga dokud nemáme dostatek
         let duplicatedLogos = [];
         const repetitions = Math.ceil(totalLogosNeeded / logos.length);
 
         for (let i = 0; i < repetitions; i++) {
             duplicatedLogos.push(...logos);
         }
-
-        // Zajistíme, že máme sudý počet sad (pro animaci -50%)
-        if (repetitions % 2 !== 0) {
-            duplicatedLogos.push(...logos);
-        }
+        if (repetitions % 2 !== 0) duplicatedLogos.push(...logos);
 
         const trackHTML = duplicatedLogos.map(logo => `
-            <img src="${logo.url}"
-                 alt=""
-                 class="logo-carousel-item"
-                 loading="lazy"
-            >
+            <img src="${logo.url}" alt="${logo.alt || ''}" class="logo-carousel-item" loading="lazy">
         `).join('');
 
         widgetContainer.innerHTML = `
-            <h2 class="text-align-center">${widgetTitle}</h2>
+            <h2>${widgetTitle}</h2>
             <div class="logo-carousel">
                 <ul class="logo-strip">
                     ${trackHTML}
@@ -150,14 +128,12 @@
         `;
     }
 
-    // Renderujeme widget
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', renderWidget);
     } else {
         renderWidget();
     }
 
-    // Re-render při změně velikosti okna
     window.addEventListener('resize', renderWidget);
 
 })();

@@ -82,6 +82,8 @@ class CreateController extends AbstractController
             'widgetId' => $widgetId,
             'title' => $widget->getTitle(),
             'attachments' => $attachmentsJson,
+            'speed' => $widget->getSpeed(),
+            'imageSize' => $widget->getImageSize(),
         ]);
 
         $response = new Response($jsTemplate);
@@ -104,48 +106,99 @@ class CreateController extends AbstractController
             return $this->json(['error' => 'Widget nenalezen'], 404);
         }
 
-        /** @var UploadedFile|null $file */
+        // Získání dat z requestu
+        $data = json_decode($request->getContent(), true);
         $file = $request->files->get('file');
-        if (!$file) {
-            return $this->json(['error' => 'Soubor "file" je povinný'], 400);
+        $externalUrl = $data['url'] ?? null;
+
+        // Kontrola, že je zadaný buď soubor nebo URL
+        if (!$file && !$externalUrl) {
+            return $this->json(['error' => 'Musíte zadat buď soubor nebo URL'], 400);
         }
 
-        // Validace typu/velikosti
-        if (!in_array($file->getMimeType(), ['image/png','image/jpeg','image/webp','image/svg+xml'])) {
-            return $this->json(['error' => 'Nepovolený typ souboru'], 400);
-        }
-        if ($file->getSize() > 5 * 1024 * 1024) {
-            return $this->json(['error' => 'Soubor je příliš velký (max 5MB)'], 400);
+        // Pokud jsou zadané oba, preferuj soubor
+        if ($file && $externalUrl) {
+            return $this->json(['error' => 'Zadejte buď soubor nebo URL, ne obojí'], 400);
         }
 
         try {
-            $dir = $this->getParameter('kernel.project_dir') . '/public/uploads/logos';
-            if (!is_dir($dir)) { @mkdir($dir, 0775, true); }
+            $attachment = null;
+            $publicUrl = '';
+            $isExternal = false;
 
-            $ext = $file->guessExtension() ?: 'bin';
-            $filename = bin2hex(random_bytes(8)) . '.' . $ext;
-            $file->move($dir, $filename);
+            if ($file) {
+                // Zpracování nahraného souboru (stávající logika)
 
-            $publicPath = '/uploads/logos/' . $filename;
+                // Validace typu/velikosti
+                if (!in_array($file->getMimeType(), ['image/png','image/jpeg','image/webp','image/svg+xml'])) {
+                    return $this->json(['error' => 'Nepovolený typ souboru'], 400);
+                }
+                if ($file->getSize() > 5 * 1024 * 1024) {
+                    return $this->json(['error' => 'Soubor je příliš velký (max 5MB)'], 400);
+                }
 
-            // vypočti next position
+                $dir = $this->getParameter('kernel.project_dir') . '/public/uploads/logos';
+                if (!is_dir($dir)) {
+                    @mkdir($dir, 0775, true);
+                }
+
+                $ext = $file->guessExtension() ?: 'bin';
+                $filename = bin2hex(random_bytes(8)) . '.' . $ext;
+                $file->move($dir, $filename);
+
+                $publicPath = '/uploads/logos/' . $filename;
+                $publicUrl = $server_domain . $publicPath;
+                $isExternal = false;
+
+            } elseif ($externalUrl) {
+                // Zpracování externí URL
+
+                // Validace URL
+                if (!filter_var($externalUrl, FILTER_VALIDATE_URL)) {
+                    return $this->json(['error' => 'Neplatná URL adresa'], 400);
+                }
+
+                // Kontrola, že URL je HTTPS nebo HTTP
+                $scheme = parse_url($externalUrl, PHP_URL_SCHEME);
+                if (!in_array($scheme, ['http', 'https'])) {
+                    return $this->json(['error' => 'URL musí začínat http:// nebo https://'], 400);
+                }
+
+                // Volitelně: ověření, že URL odkazuje na obrázek
+                // (můžete použít get_headers nebo curl pro kontrolu Content-Type)
+                $headers = @get_headers($externalUrl, 1);
+                if ($headers && isset($headers['Content-Type'])) {
+                    $contentType = is_array($headers['Content-Type'])
+                        ? $headers['Content-Type'][0]
+                        : $headers['Content-Type'];
+
+                    if (!str_starts_with($contentType, 'image/')) {
+                        return $this->json(['error' => 'URL neodkazuje na obrázek'], 400);
+                    }
+                }
+
+                $publicUrl = $externalUrl;
+                $isExternal = true;
+            }
+
+            // Vypočti next position
             $current = $widget->getAttachments();
             $nextPos = count($current);
 
-            $publicUrl = $server_domain . $publicPath;
-
+            // Vytvoř attachment
             $attachment = new Attachment($widget, $publicUrl);
             $attachment->setPosition($nextPos);
+            $attachment->setIsExternal($isExternal);
 
             $em->persist($attachment);
             $em->flush();
 
+            return $this->json($attachment, 201, [], ['groups' => ['widget:read']]);
+
         } catch (\Exception $exception) {
-            dd($exception);
+            // V produkci použijte logger místo dd()
+            return $this->json(['error' => 'Chyba při zpracování: ' . $exception->getMessage()], 500);
         }
-
-
-        return $this->json($attachment, 201, [], ['groups' => ['widget:read']]);
     }
 
     #[Route('/attachments/{id}', name: 'api_attachments_delete', methods: ['DELETE'])]

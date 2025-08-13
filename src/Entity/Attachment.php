@@ -26,6 +26,9 @@ class Attachment
     #[Groups(['widget:read'])]
     private string $url;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $isExternal = false;
+
     #[ORM\Column(type: 'integer')]
     #[Groups(['widget:read'])]
     private int $position = 0;
@@ -72,5 +75,15 @@ class Attachment
     public function setPosition(int $position): void
     {
         $this->position = $position;
+    }
+
+    public function isExternal(): bool
+    {
+        return $this->isExternal;
+    }
+
+    public function setIsExternal(bool $isExternal): void
+    {
+        $this->isExternal = $isExternal;
     }
 }

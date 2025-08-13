@@ -12,6 +12,8 @@ final readonly class UpdateWidgetAction
         public string $id,
         public string $title,
         public array $attachmentsOrder,
+        public ?int $imageSize = null,
+        public ?int $speed = null,
     ) {
     }
 }

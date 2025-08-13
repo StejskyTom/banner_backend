@@ -18,7 +18,7 @@ class WidgetService
     /**
      * @throws WidgetNotFound
      */
-    public function updateWidget(string $id, ?string $title = null, array $attachmentsOrder = []): Widget
+    public function updateWidget(string $id, ?string $title = null, array $attachmentsOrder = [], ?int $imageSize = null, ?int $speed = null): Widget
     {
         $widget = $this->widgetRepository->findOneBy(['id' => $id]);
 
@@ -27,6 +27,8 @@ class WidgetService
         }
 
         $widget->setTitle($title);
+        $widget->setImageSize($imageSize);
+        $widget->setSpeed($speed);
         foreach ($attachmentsOrder as $pos => $attId) {
             $att = $this->attachmentRepository->find($attId);
             if ($att && $att->getWidget() === $widget) {
