@@ -3,6 +3,7 @@ namespace App\Widget\Application\Handler;
 
 use App\Entity\Widget;
 use App\Lib\ViolationsTrait;
+use App\Widget\Application\Action\CreateWidgetAction;
 use App\Widget\Application\Action\UpdateWidgetAction;
 use App\Widget\Domain\Exception\WidgetNotFound;
 use App\Widget\Domain\Service\WidgetService;
@@ -33,6 +34,27 @@ readonly class UpdateWidgetHandler
             );
 
             $this->logger->info('Widget byl úspěšně uložen', [
+                'title' => $action->title,
+            ]);
+
+        } catch (WidgetNotFound $e) {
+            $this->createFieldValidationFailedException(
+                'Uživatel s tímto emailem již existuje.',
+                'email'
+            );
+        }
+
+        return $widget;
+    }
+
+
+    #[AsMessageHandler]
+    public function onWidgetCreate(CreateWidgetAction $action): Widget
+    {
+        try {
+            $widget = $this->widgetService->createWidget($action);
+
+            $this->logger->info('Widget byl úspěšně vytvořen', [
                 'title' => $action->title,
             ]);
 

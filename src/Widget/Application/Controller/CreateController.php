@@ -9,6 +9,7 @@ use App\Repository\WidgetRepository;
 use App\User\Application\Action\CreateUserAction;
 use App\User\Application\Action\UpdatePassword;
 use App\User\Infrastructure\DTO\Request\RegisterRequest;
+use App\Widget\Application\Action\CreateWidgetAction;
 use App\Widget\Application\Action\UpdateWidgetAction;
 use App\Widget\Domain\Exception\WidgetNotFound;
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,6 +37,18 @@ class CreateController extends AbstractController
     )
     {
         $this->messageBus = $messageBus;
+    }
+
+    #[Route('/widgets/logo-carousel/new', name: 'api_widgets_new', methods: ['POST'])]
+    public function createWidget(
+        #[MapRequestPayload] CreateWidgetAction $action,
+        EntityManagerInterface $em
+    ): JsonResponse {
+        $widget = $this->handle($action);
+        $em->persist($widget);
+        $em->flush();
+
+        return $this->json($widget, 200, [], ['groups' => ['widget:read']]);
     }
 
     #[Route('/widgets/{id}', name: 'api_widgets_update', methods: ['PUT'])]
@@ -217,6 +230,23 @@ class CreateController extends AbstractController
         return $this->json([
             'message' => 'Attachment byl úspěšně odstraněn',
             'id' => $attachment->getId(),
+        ]);
+    }
+
+    #[Route('/widgets/{id}', name: 'api_widget_delete', methods: ['DELETE'])]
+    public function widgetDelete(Widget $widget, EntityManagerInterface $em): JsonResponse
+    {
+        // Ověření, že attachment patří aktuálnímu uživateli
+        if ($widget->getUser() !== $this->getUser()) {
+            throw new WidgetNotFound('Položka nenalezena');
+        }
+
+        $em->remove($widget);
+        $em->flush();
+
+        return $this->json([
+            'message' => 'Widget byl úspěšně odstraněn',
+            'id' => $widget->getId(),
         ]);
     }
 

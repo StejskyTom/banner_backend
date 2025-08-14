@@ -1,18 +1,22 @@
 <?php
 namespace App\Widget\Domain\Service;
 
+use App\Entity\User;
 use App\Entity\Widget;
 use App\Repository\AttachmentRepository;
 use App\Repository\WidgetRepository;
 use App\User\Domain\Exception\InvalidEmailException;
 use App\User\Domain\Exception\UserAlreadyExistsException;
+use App\Widget\Application\Action\CreateWidgetAction;
 use App\Widget\Domain\Exception\WidgetNotFound;
+use Symfony\Bundle\SecurityBundle\Security;
 
 class WidgetService
 {
     public function __construct(
         private WidgetRepository $widgetRepository,
         private AttachmentRepository $attachmentRepository,
+        private Security $security,
     ) {}
 
     /**
@@ -38,5 +42,20 @@ class WidgetService
 
 
         return $widget;
+    }
+
+    public function createWidget(CreateWidgetAction $action): Widget
+    {
+        if (!$this->security->getUser()) {
+            throw new UserAlreadyExistsException();
+        }
+
+        /** @var User $user */
+        $user = $this->security->getUser();
+
+        return new Widget(
+            $user,
+            $action->title,
+        );
     }
 }
