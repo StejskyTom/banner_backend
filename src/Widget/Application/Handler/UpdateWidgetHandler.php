@@ -29,6 +29,7 @@ readonly class UpdateWidgetHandler
                 $action->id,
                 $action->title,
                 $action->attachmentsOrder,
+                $action->attachmentsLinks,
                 $action->imageSize,
                 $action->speed
             );
@@ -39,8 +40,8 @@ readonly class UpdateWidgetHandler
 
         } catch (WidgetNotFound $e) {
             $this->createFieldValidationFailedException(
-                'Uživatel s tímto emailem již existuje.',
-                'email'
+                'Widget nebyl nalezen.',
+                'id'
             );
         }
 
@@ -60,8 +61,8 @@ readonly class UpdateWidgetHandler
 
         } catch (WidgetNotFound $e) {
             $this->createFieldValidationFailedException(
-                'Uživatel s tímto emailem již existuje.',
-                'email'
+                'Chyba při vytváření widgetu.',
+                'title'
             );
         }
 

@@ -72,7 +72,12 @@
             opacity:.85;
             transition: opacity .2s ease;
         }
-        .logo-strip img:hover{ opacity:1; }
+        .logo-strip a{
+            text-decoration: none;
+            display: inline-block;
+        }
+        .logo-strip img:hover{ opacity:1; cursor: pointer; }
+        .logo-strip a:hover img{ opacity:1; }
         @keyframes scroll{
             from { transform: translateX(0); }
             to   { transform: translateX(-50%); }
@@ -114,9 +119,14 @@
         }
         if (repetitions % 2 !== 0) duplicatedLogos.push(...logos);
 
-        const trackHTML = duplicatedLogos.map(logo => `
-            <img src="${logo.url}" alt="${logo.alt || ''}" class="logo-carousel-item" loading="lazy">
-        `).join('');
+        const trackHTML = duplicatedLogos.map(logo => {
+            const imgTag = `<img src="${logo.url}" alt="${logo.alt || ''}" class="logo-carousel-item" loading="lazy">`;
+
+            if (logo.link) {
+                return `<a href="${logo.link}" target="_blank" rel="noopener noreferrer" style="display: inline-block;">${imgTag}</a>`;
+            }
+            return imgTag;
+        }).join('');
 
         widgetContainer.innerHTML = `
             <h2>${widgetTitle}</h2>

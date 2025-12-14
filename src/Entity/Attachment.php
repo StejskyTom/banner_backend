@@ -33,6 +33,10 @@ class Attachment
     #[Groups(['widget:read'])]
     private int $position = 0;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['widget:read'])]
+    private ?string $link = null;
+
     public function __construct(
         Widget $widget,
         string $url = '',
@@ -85,5 +89,15 @@ class Attachment
     public function setIsExternal(bool $isExternal): void
     {
         $this->isExternal = $isExternal;
+    }
+
+    public function getLink(): ?string
+    {
+        return $this->link;
+    }
+
+    public function setLink(?string $link): void
+    {
+        $this->link = $link;
     }
 }
