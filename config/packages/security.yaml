@@ -41,6 +41,7 @@ security:
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
         - { path: ^/api/widget/.+/embed\.js$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/heureka/.+/embed\.js$, roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: ROLE_USER }
 
 when@test:

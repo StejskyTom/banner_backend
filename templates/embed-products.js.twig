@@ -1,0 +1,160 @@
+(function() {
+    'use strict';
+
+    const products = {{ products|raw }};
+    const feedId = '{{ feedId }}';
+    const feedName = "{{ feedName }}";
+
+    const currentScript = document.currentScript ||
+        (function() {
+            const scripts = document.getElementsByTagName('script');
+            return scripts[scripts.length - 1];
+        })();
+
+    const widgetContainer = document.createElement('div');
+    widgetContainer.id = 'heureka-widget-' + feedId + '-' + Date.now();
+    widgetContainer.className = 'heureka-product-carousel';
+    currentScript.parentNode.insertBefore(widgetContainer, currentScript);
+
+    const styles = `
+        .heureka-product-carousel {
+            width: 100%;
+            margin: 32px auto;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .heureka-product-carousel h2 {
+            text-align: center;
+            font-size: clamp(1.25rem, 2vw, 1.75rem);
+            margin: 0 0 24px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .heureka-carousel-track {
+            display: flex;
+            gap: 24px;
+            width: max-content;
+            animation: heureka-scroll 40s linear infinite;
+        }
+
+        .heureka-product-card {
+            min-width: 220px;
+            max-width: 220px;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-align: center;
+        }
+
+        .heureka-product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .heureka-product-card img {
+            width: 100%;
+            height: 160px;
+            object-fit: contain;
+            margin-bottom: 12px;
+        }
+
+        .heureka-product-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            min-height: 42px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        .heureka-product-price {
+            font-size: 20px;
+            font-weight: bold;
+            color: #16a34a;
+            margin-bottom: 12px;
+        }
+
+        .heureka-buy-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .heureka-buy-btn:hover {
+            background: #1d4ed8;
+        }
+
+        @keyframes heureka-scroll {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+
+        @media (max-width: 768px) {
+            .heureka-product-card {
+                min-width: 180px;
+                max-width: 180px;
+            }
+
+            .heureka-product-card img {
+                height: 120px;
+            }
+        }
+    `;
+
+    if (!document.getElementById('heureka-widget-styles')) {
+        const styleSheet = document.createElement('style');
+        styleSheet.id = 'heureka-widget-styles';
+        styleSheet.textContent = styles;
+        document.head.appendChild(styleSheet);
+    }
+
+    function renderWidget() {
+        if (!products || products.length === 0) {
+            widgetContainer.innerHTML = '<p style="text-align: center; color: #666;">Žádné produkty k zobrazení</p>';
+            return;
+        }
+
+        // Duplicate products for infinite scroll
+        const duplicatedProducts = [...products, ...products];
+
+        const trackHTML = duplicatedProducts.map(product => `
+            <div class="heureka-product-card">
+                <img src="${product.imgUrl || '/placeholder.png'}" alt="${product.productName}" loading="lazy">
+                <div class="heureka-product-title">${product.productName}</div>
+                <div class="heureka-product-price">${parseFloat(product.priceVat).toLocaleString('cs-CZ')} Kč</div>
+                <a href="${product.url}" target="_blank" rel="noopener noreferrer" class="heureka-buy-btn">
+                    Koupit
+                </a>
+            </div>
+        `).join('');
+
+        widgetContainer.innerHTML = `
+            <h2>${feedName}</h2>
+            <div class="heureka-product-carousel">
+                <div class="heureka-carousel-track">
+                    ${trackHTML}
+                </div>
+            </div>
+        `;
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderWidget);
+    } else {
+        renderWidget();
+    }
+})();

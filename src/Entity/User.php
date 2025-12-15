@@ -42,9 +42,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Widget::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $widgets;
 
+    /**
+     * @var Collection<int, HeurekaFeed>
+     */
+    #[ORM\OneToMany(targetEntity: HeurekaFeed::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $heurekaFeeds;
+
     public function __construct()
     {
         $this->widgets = new ArrayCollection();
+        $this->heurekaFeeds = new ArrayCollection();
     }
 
     public function getId(): ?Uuid
@@ -148,6 +155,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $widget->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HeurekaFeed>
+     */
+    public function getHeurekaFeeds(): Collection
+    {
+        return $this->heurekaFeeds;
+    }
+
+    public function addHeurekaFeed(HeurekaFeed $feed): static
+    {
+        if (!$this->heurekaFeeds->contains($feed)) {
+            $this->heurekaFeeds->add($feed);
+        }
+
+        return $this;
+    }
+
+    public function removeHeurekaFeed(HeurekaFeed $feed): static
+    {
+        $this->heurekaFeeds->removeElement($feed);
 
         return $this;
     }
