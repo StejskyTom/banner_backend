@@ -21,7 +21,7 @@ class HeurekaFeedRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('f')
             ->where('f.user = :user')
-            ->setParameter('user', $user)
+            ->setParameter('user', $user->getId(), 'uuid')
             ->orderBy('f.name', 'ASC')
             ->getQuery()
             ->getResult();
@@ -32,8 +32,8 @@ class HeurekaFeedRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('f')
             ->where('f.user = :user')
             ->andWhere('f.id = :id')
-            ->setParameter('user', $user)
-            ->setParameter('id', $id)
+            ->setParameter('user', $user->getId(), 'uuid')
+            ->setParameter('id', $id, 'uuid')
             ->getQuery()
             ->getOneOrNullResult();
     }
