@@ -4,6 +4,8 @@
     const products = {{ products|raw }};
     const feedId = '{{ feedId }}';
     const feedName = "{{ feedName }}";
+    const layout = "{{ layout|default('carousel') }}";
+    const options = {{ layoutOptions|json_encode|raw }} || {};
 
     const currentScript = document.currentScript ||
         (function() {
@@ -13,104 +15,204 @@
 
     const widgetContainer = document.createElement('div');
     widgetContainer.id = 'heureka-widget-' + feedId + '-' + Date.now();
-    widgetContainer.className = 'heureka-product-carousel';
+    widgetContainer.className = 'heureka-widget-container heureka-layout-' + layout;
     currentScript.parentNode.insertBefore(widgetContainer, currentScript);
 
     const styles = `
-        .heureka-product-carousel {
+        .heureka-widget-container {
             width: 100%;
             margin: 32px auto;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .heureka-widget-container h2 {
+            text-align: center;
+            font-size: clamp(1.25rem, 2vw, 1.75rem);
+            margin: 0 0 32px;
+            font-weight: 800;
+            color: #111827;
+            letter-spacing: -0.025em;
+        }
+
+        .heureka-product-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            box-sizing: border-box;
+            border: 1px solid rgba(229, 231, 235, 0.5);
+        }
+
+        .heureka-product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .heureka-product-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+            margin-bottom: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .heureka-product-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .heureka-product-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 12px;
+            min-height: 44px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+
+        .heureka-product-price {
+            font-size: 22px;
+            font-weight: 800;
+            color: #059669;
+            margin-bottom: 16px;
+            letter-spacing: -0.025em;
+        }
+
+        .heureka-buy-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            background: ${options.buttonColor || '#2563eb'};
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-top: auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .heureka-buy-btn:hover {
+            filter: brightness(90%);
+            transform: translateY(-1px);
+        }
+
+        /* Carousel Styles */
+        .heureka-layout-carousel .heureka-carousel-wrapper {
             overflow: hidden;
             position: relative;
         }
-
-        .heureka-product-carousel h2 {
-            text-align: center;
-            font-size: clamp(1.25rem, 2vw, 1.75rem);
-            margin: 0 0 24px;
-            font-weight: 700;
-            color: #1f2937;
-        }
-
-        .heureka-carousel-track {
+        .heureka-layout-carousel .heureka-carousel-track {
             display: flex;
             gap: 24px;
             width: max-content;
             animation: heureka-scroll 40s linear infinite;
         }
-
-        .heureka-product-card {
+        .heureka-layout-carousel .heureka-product-card {
             min-width: 220px;
             max-width: 220px;
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-            text-align: center;
         }
-
-        .heureka-product-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-        }
-
-        .heureka-product-card img {
-            width: 100%;
-            height: 160px;
-            object-fit: contain;
-            margin-bottom: 12px;
-        }
-
-        .heureka-product-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 8px;
-            min-height: 42px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            line-height: 1.4;
-        }
-
-        .heureka-product-price {
-            font-size: 20px;
-            font-weight: bold;
-            color: #16a34a;
-            margin-bottom: 12px;
-        }
-
-        .heureka-buy-btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background: #2563eb;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-
-        .heureka-buy-btn:hover {
-            background: #1d4ed8;
-        }
-
         @keyframes heureka-scroll {
             from { transform: translateX(0); }
             to { transform: translateX(-50%); }
         }
 
+        /* Grid Styles */
+        .heureka-layout-grid .heureka-grid-wrapper {
+            display: grid;
+            grid-template-columns: repeat(${options.gridColumns || 'auto-fill'}, minmax(220px, 1fr));
+            gap: 24px;
+        }
+
+        /* List Styles */
+        .heureka-layout-list .heureka-list-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .heureka-layout-list .heureka-product-card {
+            flex-direction: row;
+            align-items: center;
+            text-align: left;
+            height: auto;
+            max-width: 100%;
+            padding: 16px 24px;
+        }
+        .heureka-layout-list .heureka-product-card img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 0;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+        .heureka-layout-list .heureka-product-title {
+            margin-bottom: 0;
+            margin-right: 24px;
+            min-height: auto;
+            -webkit-line-clamp: 2;
+            font-size: 16px;
+        }
+        .heureka-layout-list .heureka-product-price {
+            margin-bottom: 0;
+            margin-right: 24px;
+            white-space: nowrap;
+            margin-left: auto; /* Push price and button to the right */
+            font-size: 18px;
+        }
+        .heureka-layout-list .heureka-buy-btn {
+            margin-top: 0;
+            width: auto;
+            min-width: 140px;
+            flex-shrink: 0;
+        }
+
         @media (max-width: 768px) {
-            .heureka-product-card {
+            .heureka-layout-carousel .heureka-product-card {
                 min-width: 180px;
                 max-width: 180px;
             }
-
-            .heureka-product-card img {
+            .heureka-layout-carousel .heureka-product-card img {
                 height: 120px;
+            }
+            .heureka-layout-grid .heureka-grid-wrapper {
+                grid-template-columns: repeat(${options.mobileGridColumns || 1}, 1fr);
+            }
+            .heureka-layout-list .heureka-product-card {
+                flex-wrap: wrap;
+                padding: 16px;
+            }
+            .heureka-layout-list .heureka-product-card img {
+                width: 60px;
+                height: 60px;
+                margin-right: 16px;
+            }
+            .heureka-layout-list .heureka-product-title {
+                font-size: 14px;
+                margin-right: 0;
+                width: calc(100% - 76px); /* Full width minus image and gap */
+                margin-bottom: 12px;
+            }
+            .heureka-layout-list .heureka-product-price {
+                margin-left: 0;
+                margin-right: auto;
+                font-size: 18px;
+            }
+            .heureka-layout-list .heureka-buy-btn {
+                width: auto;
+                min-width: 120px;
+                margin-left: 16px;
             }
         }
     `;
@@ -128,10 +230,42 @@
             return;
         }
 
-        // Duplicate products for infinite scroll
-        const duplicatedProducts = [...products, ...products];
+        let contentHTML = '';
 
-        const trackHTML = duplicatedProducts.map(product => `
+        if (layout === 'carousel') {
+            const duplicatedProducts = [...products, ...products];
+            const trackHTML = duplicatedProducts.map(product => renderCard(product)).join('');
+            contentHTML = `
+                <div class="heureka-carousel-wrapper">
+                    <div class="heureka-carousel-track">
+                        ${trackHTML}
+                    </div>
+                </div>
+            `;
+        } else if (layout === 'grid') {
+            const gridHTML = products.map(product => renderCard(product)).join('');
+            contentHTML = `
+                <div class="heureka-grid-wrapper">
+                    ${gridHTML}
+                </div>
+            `;
+        } else if (layout === 'list') {
+            const listHTML = products.map(product => renderCard(product)).join('');
+            contentHTML = `
+                <div class="heureka-list-wrapper">
+                    ${listHTML}
+                </div>
+            `;
+        }
+
+        widgetContainer.innerHTML = `
+            <h2>${feedName}</h2>
+            ${contentHTML}
+        `;
+    }
+
+    function renderCard(product) {
+        return `
             <div class="heureka-product-card">
                 <img src="${product.imgUrl || '/placeholder.png'}" alt="${product.productName}" loading="lazy">
                 <div class="heureka-product-title">${product.productName}</div>
@@ -139,15 +273,6 @@
                 <a href="${product.url}" target="_blank" rel="noopener noreferrer" class="heureka-buy-btn">
                     Koupit
                 </a>
-            </div>
-        `).join('');
-
-        widgetContainer.innerHTML = `
-            <h2>${feedName}</h2>
-            <div class="heureka-product-carousel">
-                <div class="heureka-carousel-track">
-                    ${trackHTML}
-                </div>
             </div>
         `;
     }

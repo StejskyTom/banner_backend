@@ -150,7 +150,14 @@ class CreateController extends AbstractController
                     return $this->json(['error' => 'Soubor je příliš velký (max 5MB)'], 400);
                 }
 
-                $dir = $this->getParameter('kernel.project_dir') . '/public/uploads/logos';
+                $publicDir = $this->getParameter('app.public_dir');
+                
+                // Auto-detection for shared hosting (Endora)
+                if ($publicDir === 'public' && is_dir($this->getParameter('kernel.project_dir') . '/public_html')) {
+                    $publicDir = 'public_html';
+                }
+
+                $dir = $this->getParameter('kernel.project_dir') . '/' . $publicDir . '/uploads/logos';
                 if (!is_dir($dir)) {
                     @mkdir($dir, 0775, true);
                 }

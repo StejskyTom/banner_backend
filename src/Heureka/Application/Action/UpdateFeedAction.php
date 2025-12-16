@@ -10,5 +10,7 @@ final readonly class UpdateFeedAction
         public string $id,
         public ?string $name = null,
         public ?string $url = null,
+        public ?string $layout = null,
+        public ?array $layoutOptions = null,
     ) {}
 }

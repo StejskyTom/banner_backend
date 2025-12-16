@@ -25,7 +25,7 @@ class Category
     #[Groups(['category:read', 'product:read'])]
     private string $name;
 
-    #[ORM\Column(length: 1000)]
+    #[ORM\Column(length: 750)]
     #[Groups(['category:read'])]
     private string $fullPath;
 

@@ -40,6 +40,8 @@ class ProductEmbedController extends AbstractController
             'feedId' => $feedId,
             'feedName' => $feed->getName(),
             'products' => $productsJson,
+            'layout' => $feed->getLayout(),
+            'layoutOptions' => $feed->getLayoutOptions(),
         ]);
 
         $response = new Response($jsTemplate);

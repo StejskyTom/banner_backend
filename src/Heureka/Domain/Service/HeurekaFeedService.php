@@ -55,6 +55,14 @@ class HeurekaFeedService
             $feed->setUrl($action->url);
         }
 
+        if ($action->layout !== null) {
+            $feed->setLayout($action->layout);
+        }
+
+        if ($action->layoutOptions !== null) {
+            $feed->setLayoutOptions($action->layoutOptions);
+        }
+
         return $feed;
     }
 }

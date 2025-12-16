@@ -10,4 +10,8 @@ class UpdateFeedRequest
     public ?string $url = null;
 
     public ?string $name = null;
+
+    public ?string $layout = null;
+
+    public ?array $layoutOptions = null;
 }

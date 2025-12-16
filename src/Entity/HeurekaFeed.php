@@ -44,12 +44,21 @@ class HeurekaFeed
     #[Groups(['feed:read'])]
     private int $productCount = 0;
 
+    #[ORM\Column(length: 50, options: ['default' => 'carousel'])]
+    #[Groups(['feed:read'])]
+    private string $layout = 'carousel';
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    #[Groups(['feed:read'])]
+    private ?array $layoutOptions = null;
+
     public function __construct(User $user, string $name, string $url)
     {
         $this->user = $user;
         $this->name = $name;
         $this->url = $url;
         $this->products = new ArrayCollection();
+        $this->layout = 'carousel';
     }
 
     public function getId(): ?Uuid
@@ -123,5 +132,25 @@ class HeurekaFeed
     public function incrementProductCount(): void
     {
         $this->productCount++;
+    }
+
+    public function getLayout(): string
+    {
+        return $this->layout;
+    }
+
+    public function setLayout(string $layout): void
+    {
+        $this->layout = $layout;
+    }
+
+    public function getLayoutOptions(): ?array
+    {
+        return $this->layoutOptions;
+    }
+
+    public function setLayoutOptions(?array $layoutOptions): void
+    {
+        $this->layoutOptions = $layoutOptions;
     }
 }

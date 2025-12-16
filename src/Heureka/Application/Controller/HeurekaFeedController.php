@@ -88,7 +88,9 @@ class HeurekaFeedController extends AbstractController
         $action = new UpdateFeedAction(
             id: (string) $feed->getId(),
             name: $request->name,
-            url: $request->url
+            url: $request->url,
+            layout: $request->layout,
+            layoutOptions: $request->layoutOptions
         );
 
         $updatedFeed = $this->handle($action);
