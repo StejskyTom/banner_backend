@@ -46,13 +46,15 @@ class ProductController extends AbstractController
         $category = $request->query->get('category');
         $limit = (int) $request->query->get('limit', 100);
         $offset = (int) $request->query->get('offset', 0);
+        $sort = $request->query->get('sort', 'name_asc');
 
         $products = $this->productRepository->findByFeedWithFilters(
             $feed,
             $search,
             $category,
             $limit,
-            $offset
+            $offset,
+            $sort
         );
 
         $total = $this->productRepository->countByFeedWithFilters($feed, $search, $category);

@@ -32,7 +32,8 @@ class ProductRepository extends ServiceEntityRepository
         ?string $search = null,
         ?string $categoryName = null,
         int $limit = 100,
-        int $offset = 0
+        int $offset = 0,
+        string $sort = 'name_asc'
     ): array {
         $qb = $this->createQueryBuilder('p')
             ->leftJoin('p.category', 'c')
@@ -50,8 +51,23 @@ class ProductRepository extends ServiceEntityRepository
                ->setParameter('categoryName', $categoryName);
         }
 
-        return $qb->orderBy('p.productName', 'ASC')
-            ->setMaxResults($limit)
+        switch ($sort) {
+            case 'name_desc':
+                $qb->orderBy('p.productName', 'DESC');
+                break;
+            case 'price_asc':
+                $qb->orderBy('p.priceVat', 'ASC');
+                break;
+            case 'price_desc':
+                $qb->orderBy('p.priceVat', 'DESC');
+                break;
+            case 'name_asc':
+            default:
+                $qb->orderBy('p.productName', 'ASC');
+                break;
+        }
+
+        return $qb->setMaxResults($limit)
             ->setFirstResult($offset)
             ->getQuery()
             ->getResult();
