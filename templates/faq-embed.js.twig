@@ -1,0 +1,106 @@
+(function() {
+    const widgetId = 'faq-widget-{{ widget.id }}';
+    const questions = {{ widget.questions|json_encode|raw }};
+
+    // Create container
+    const container = document.createElement('div');
+    container.id = widgetId;
+    container.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+    container.style.maxWidth = '800px';
+    container.style.margin = '0 auto';
+    container.style.padding = '20px';
+
+    // Create styles
+    const style = document.createElement('style');
+    style.textContent = `
+        #${widgetId} .faq-item {
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 10px;
+        }
+        #${widgetId} .faq-question {
+            width: 100%;
+            text-align: left;
+            padding: 16px 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            transition: color 0.2s;
+        }
+        #${widgetId} .faq-question:hover {
+            color: #4f46e5;
+        }
+        #${widgetId} .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            color: #4b5563;
+            line-height: 1.6;
+        }
+        #${widgetId} .faq-answer-content {
+            padding-bottom: 16px;
+        }
+        #${widgetId} .faq-icon {
+            width: 24px;
+            height: 24px;
+            transition: transform 0.3s;
+            flex-shrink: 0;
+            margin-left: 16px;
+        }
+        #${widgetId} .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+        #${widgetId} .faq-item.active .faq-answer {
+            max-height: 500px; /* Approximate max height */
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Render questions
+    questions.forEach((q, index) => {
+        const item = document.createElement('div');
+        item.className = 'faq-item';
+
+        const button = document.createElement('button');
+        button.className = 'faq-question';
+        button.innerHTML = `
+            <span>${q.question}</span>
+            <svg class="faq-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+        `;
+
+        const answer = document.createElement('div');
+        answer.className = 'faq-answer';
+        answer.innerHTML = `<div class="faq-answer-content">${q.answer}</div>`;
+
+        button.addEventListener('click', () => {
+            const isActive = item.classList.contains('active');
+            
+            // Close all others (optional - can be removed for multiple open)
+            container.querySelectorAll('.faq-item').forEach(i => {
+                i.classList.remove('active');
+                i.querySelector('.faq-answer').style.maxHeight = null;
+            });
+
+            if (!isActive) {
+                item.classList.add('active');
+                answer.style.maxHeight = answer.scrollHeight + 'px';
+            }
+        });
+
+        item.appendChild(button);
+        item.appendChild(answer);
+        container.appendChild(item);
+    });
+
+    // Find script tag to insert after
+    const scripts = document.getElementsByTagName('script');
+    const currentScript = scripts[scripts.length - 1];
+    currentScript.parentNode.insertBefore(container, currentScript.nextSibling);
+})();
