@@ -13,11 +13,11 @@
     // Create styles
     const style = document.createElement('style');
     style.textContent = `
-        #${widgetId} .faq-item {
+        #${widgetId} .bnnr_faq_item {
             border-bottom: 1px solid #e5e7eb;
             margin-bottom: 10px;
         }
-        #${widgetId} .faq-question {
+        #${widgetId} .bnnr_faq_question {
             width: 100%;
             text-align: left;
             padding: 16px 0;
@@ -32,30 +32,30 @@
             color: #111827;
             transition: color 0.2s;
         }
-        #${widgetId} .faq-question:hover {
+        #${widgetId} .bnnr_faq_question:hover {
             color: #4f46e5;
         }
-        #${widgetId} .faq-answer {
+        #${widgetId} .bnnr_faq_answer {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.3s ease-out;
             color: #4b5563;
             line-height: 1.6;
         }
-        #${widgetId} .faq-answer-content {
+        #${widgetId} .bnnr_faq_ans_content {
             padding-bottom: 16px;
         }
-        #${widgetId} .faq-icon {
+        #${widgetId} .bnnr_faq_icon {
             width: 24px;
             height: 24px;
             transition: transform 0.3s;
             flex-shrink: 0;
             margin-left: 16px;
         }
-        #${widgetId} .faq-item.active .faq-icon {
+        #${widgetId} .bnnr_faq_item.bnnr_active .bnnr_faq_icon {
             transform: rotate(180deg);
         }
-        #${widgetId} .faq-item.active .faq-answer {
+        #${widgetId} .bnnr_faq_item.bnnr_active .bnnr_faq_answer {
             max-height: 500px; /* Approximate max height */
         }
     `;
@@ -64,32 +64,32 @@
     // Render questions
     questions.forEach((q, index) => {
         const item = document.createElement('div');
-        item.className = 'faq-item';
+        item.className = 'bnnr_faq_item';
 
         const button = document.createElement('button');
-        button.className = 'faq-question';
+        button.className = 'bnnr_faq_question';
         button.innerHTML = `
             <span>${q.question}</span>
-            <svg class="faq-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="bnnr_faq_icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
         `;
 
         const answer = document.createElement('div');
-        answer.className = 'faq-answer';
-        answer.innerHTML = `<div class="faq-answer-content">${q.answer}</div>`;
+        answer.className = 'bnnr_faq_answer';
+        answer.innerHTML = `<div class="bnnr_faq_ans_content">${q.answer}</div>`;
 
         button.addEventListener('click', () => {
-            const isActive = item.classList.contains('active');
+            const isActive = item.classList.contains('bnnr_active');
             
             // Close all others (optional - can be removed for multiple open)
-            container.querySelectorAll('.faq-item').forEach(i => {
-                i.classList.remove('active');
-                i.querySelector('.faq-answer').style.maxHeight = null;
+            container.querySelectorAll('.bnnr_faq_item').forEach(i => {
+                i.classList.remove('bnnr_active');
+                i.querySelector('.bnnr_faq_answer').style.maxHeight = null;
             });
 
             if (!isActive) {
-                item.classList.add('active');
+                item.classList.add('bnnr_active');
                 answer.style.maxHeight = answer.scrollHeight + 'px';
             }
         });

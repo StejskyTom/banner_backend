@@ -15,17 +15,17 @@
 
     const widgetContainer = document.createElement('div');
     widgetContainer.id = 'heureka-widget-' + feedId + '-' + Date.now();
-    widgetContainer.className = 'heureka-widget-container heureka-layout-' + layout;
+    widgetContainer.className = 'bnnr_prod_widget bnnr_layout_' + layout;
     currentScript.parentNode.insertBefore(widgetContainer, currentScript);
 
     const styles = `
-        .heureka-widget-container {
+        .bnnr_prod_widget {
             width: 100%;
             margin: 32px auto;
             font-family: system-ui, -apple-system, sans-serif;
         }
 
-        .heureka-widget-container h2 {
+        .bnnr_prod_widget h2 {
             text-align: center;
             font-size: clamp(1.25rem, 2vw, 1.75rem);
             margin: 0 0 32px;
@@ -34,7 +34,7 @@
             letter-spacing: -0.025em;
         }
 
-        .heureka-product-card {
+        .bnnr_prod_card {
             background: #ffffff;
             border-radius: 16px;
             padding: 20px;
@@ -48,12 +48,12 @@
             border: 1px solid rgba(229, 231, 235, 0.5);
         }
 
-        .heureka-product-card:hover {
+        .bnnr_prod_card:hover {
             transform: translateY(-4px);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
 
-        .heureka-product-card img {
+        .bnnr_prod_card img {
             width: 100%;
             height: 180px;
             object-fit: contain;
@@ -61,11 +61,11 @@
             transition: transform 0.3s ease;
         }
 
-        .heureka-product-card:hover img {
+        .bnnr_prod_card:hover img {
             transform: scale(1.05);
         }
 
-        .heureka-product-title {
+        .bnnr_prod_title {
             font-size: 15px;
             font-weight: 600;
             color: #374151;
@@ -79,7 +79,7 @@
             flex-grow: 1;
         }
 
-        .heureka-product-price {
+        .bnnr_prod_price {
             font-size: 22px;
             font-weight: 800;
             color: #059669;
@@ -87,7 +87,7 @@
             letter-spacing: -0.025em;
         }
 
-        .heureka-buy-btn {
+        .bnnr_buy_btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -104,23 +104,23 @@
             box-sizing: border-box;
         }
 
-        .heureka-buy-btn:hover {
+        .bnnr_buy_btn:hover {
             filter: brightness(90%);
             transform: translateY(-1px);
         }
 
         /* Carousel Styles */
-        .heureka-layout-carousel .heureka-carousel-wrapper {
+        .bnnr_layout_carousel .bnnr_car_wrapper {
             overflow: hidden;
             position: relative;
         }
-        .heureka-layout-carousel .heureka-carousel-track {
+        .bnnr_layout_carousel .bnnr_car_track {
             display: flex;
             gap: 24px;
             width: max-content;
             animation: heureka-scroll 40s linear infinite;
         }
-        .heureka-layout-carousel .heureka-product-card {
+        .bnnr_layout_carousel .bnnr_prod_card {
             min-width: 220px;
             max-width: 220px;
         }
@@ -130,19 +130,19 @@
         }
 
         /* Grid Styles */
-        .heureka-layout-grid .heureka-grid-wrapper {
+        .bnnr_layout_grid .bnnr_grid_wrapper {
             display: grid;
             grid-template-columns: repeat(${options.gridColumns || 'auto-fill'}, minmax(220px, 1fr));
             gap: 24px;
         }
 
         /* List Styles */
-        .heureka-layout-list .heureka-list-wrapper {
+        .bnnr_layout_list .bnnr_list_wrapper {
             display: flex;
             flex-direction: column;
             gap: 16px;
         }
-        .heureka-layout-list .heureka-product-card {
+        .bnnr_layout_list .bnnr_prod_card {
             flex-direction: row;
             align-items: center;
             text-align: left;
@@ -150,28 +150,28 @@
             max-width: 100%;
             padding: 16px 24px;
         }
-        .heureka-layout-list .heureka-product-card img {
+        .bnnr_layout_list .bnnr_prod_card img {
             width: 80px;
             height: 80px;
             margin-bottom: 0;
             margin-right: 20px;
             flex-shrink: 0;
         }
-        .heureka-layout-list .heureka-product-title {
+        .bnnr_layout_list .bnnr_prod_title {
             margin-bottom: 0;
             margin-right: 24px;
             min-height: auto;
             -webkit-line-clamp: 2;
             font-size: 16px;
         }
-        .heureka-layout-list .heureka-product-price {
+        .bnnr_layout_list .bnnr_prod_price {
             margin-bottom: 0;
             margin-right: 24px;
             white-space: nowrap;
             margin-left: auto; /* Push price and button to the right */
             font-size: 18px;
         }
-        .heureka-layout-list .heureka-buy-btn {
+        .bnnr_layout_list .bnnr_buy_btn {
             margin-top: 0;
             width: auto;
             min-width: 140px;
@@ -179,37 +179,37 @@
         }
 
         @media (max-width: 768px) {
-            .heureka-layout-carousel .heureka-product-card {
+            .bnnr_layout_carousel .bnnr_prod_card {
                 min-width: 180px;
                 max-width: 180px;
             }
-            .heureka-layout-carousel .heureka-product-card img {
+            .bnnr_layout_carousel .bnnr_prod_card img {
                 height: 120px;
             }
-            .heureka-layout-grid .heureka-grid-wrapper {
+            .bnnr_layout_grid .bnnr_grid_wrapper {
                 grid-template-columns: repeat(${options.mobileGridColumns || 1}, 1fr);
             }
-            .heureka-layout-list .heureka-product-card {
+            .bnnr_layout_list .bnnr_prod_card {
                 flex-wrap: wrap;
                 padding: 16px;
             }
-            .heureka-layout-list .heureka-product-card img {
+            .bnnr_layout_list .bnnr_prod_card img {
                 width: 60px;
                 height: 60px;
                 margin-right: 16px;
             }
-            .heureka-layout-list .heureka-product-title {
+            .bnnr_layout_list .bnnr_prod_title {
                 font-size: 14px;
                 margin-right: 0;
                 width: calc(100% - 76px); /* Full width minus image and gap */
                 margin-bottom: 12px;
             }
-            .heureka-layout-list .heureka-product-price {
+            .bnnr_layout_list .bnnr_prod_price {
                 margin-left: 0;
                 margin-right: auto;
                 font-size: 18px;
             }
-            .heureka-layout-list .heureka-buy-btn {
+            .bnnr_layout_list .bnnr_buy_btn {
                 width: auto;
                 min-width: 120px;
                 margin-left: 16px;
@@ -236,8 +236,8 @@
             const duplicatedProducts = [...products, ...products];
             const trackHTML = duplicatedProducts.map(product => renderCard(product)).join('');
             contentHTML = `
-                <div class="heureka-carousel-wrapper">
-                    <div class="heureka-carousel-track">
+                <div class="bnnr_car_wrapper">
+                    <div class="bnnr_car_track">
                         ${trackHTML}
                     </div>
                 </div>
@@ -245,14 +245,14 @@
         } else if (layout === 'grid') {
             const gridHTML = products.map(product => renderCard(product)).join('');
             contentHTML = `
-                <div class="heureka-grid-wrapper">
+                <div class="bnnr_grid_wrapper">
                     ${gridHTML}
                 </div>
             `;
         } else if (layout === 'list') {
             const listHTML = products.map(product => renderCard(product)).join('');
             contentHTML = `
-                <div class="heureka-list-wrapper">
+                <div class="bnnr_list_wrapper">
                     ${listHTML}
                 </div>
             `;
@@ -266,11 +266,11 @@
 
     function renderCard(product) {
         return `
-            <div class="heureka-product-card">
+            <div class="bnnr_prod_card">
                 <img src="${product.imgUrl || '/placeholder.png'}" alt="${product.productName}" loading="lazy">
-                <div class="heureka-product-title">${product.productName}</div>
-                <div class="heureka-product-price">${parseFloat(product.priceVat).toLocaleString('cs-CZ')} Kč</div>
-                <a href="${product.url}" target="_blank" rel="noopener noreferrer" class="heureka-buy-btn">
+                <div class="bnnr_prod_title">${product.productName}</div>
+                <div class="bnnr_prod_price">${parseFloat(product.priceVat).toLocaleString('cs-CZ')} Kč</div>
+                <a href="${product.url}" target="_blank" rel="noopener noreferrer" class="bnnr_buy_btn">
                     Koupit
                 </a>
             </div>

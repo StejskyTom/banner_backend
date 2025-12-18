@@ -23,7 +23,7 @@
 
     const widgetContainer = document.createElement('div');
     widgetContainer.id = 'widget-' + widgetId + '-' + Date.now();
-    widgetContainer.className = 'logo-carousel-widget';
+    widgetContainer.className = 'bnnr_logo_widget';
     currentScript.parentNode.insertBefore(widgetContainer, currentScript);
 
     const styles = `
@@ -46,7 +46,7 @@
             color:var(--fg);
             font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
         }
-        .logo-carousel{
+        .bnnr_logo_carousel{
             width:100%;
             margin: 0 auto;
             overflow:hidden;
@@ -54,7 +54,7 @@
             mask-image: linear-gradient(to right, transparent 0, #000 var(--mask-left), #000 calc(100% - var(--mask-right)), transparent 100%);
             -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--mask-left), #000 calc(100% - var(--mask-right)), transparent 100%);
         }
-        .logo-strip{
+        .bnnr_logo_strip{
             display:flex;
             align-items:center;
             list-style:none;
@@ -64,7 +64,7 @@
             width:max-content;
             animation: scroll var(--speed) linear infinite;
         }
-        .logo-strip img{
+        .bnnr_logo_strip img{
             height:var(--img-h);
             max-width:var(--img-max-w);
             object-fit:contain;
@@ -72,12 +72,12 @@
             opacity:.85;
             transition: opacity .2s ease;
         }
-        .logo-strip a{
+        .bnnr_logo_strip a{
             text-decoration: none;
             display: inline-block;
         }
-        .logo-strip img:hover{ opacity:1; cursor: pointer; }
-        .logo-strip a:hover img{ opacity:1; }
+        .bnnr_logo_strip img:hover{ opacity:1; cursor: pointer; }
+        .bnnr_logo_strip a:hover img{ opacity:1; }
         @keyframes scroll{
             from { transform: translateX(0); }
             to   { transform: translateX(-50%); }
@@ -120,7 +120,7 @@
         if (repetitions % 2 !== 0) duplicatedLogos.push(...logos);
 
         const trackHTML = duplicatedLogos.map(logo => {
-            const imgTag = `<img src="${logo.url}" alt="${logo.alt || ''}" class="logo-carousel-item" loading="lazy">`;
+            const imgTag = `<img src="${logo.url}" alt="${logo.alt || ''}" class="bnnr_logo_item" loading="lazy">`;
 
             if (logo.link) {
                 return `<a href="${logo.link}" target="_blank" rel="noopener noreferrer" style="display: inline-block;">${imgTag}</a>`;
@@ -130,8 +130,8 @@
 
         widgetContainer.innerHTML = `
             <h2>${widgetTitle}</h2>
-            <div class="logo-carousel">
-                <ul class="logo-strip">
+            <div class="bnnr_logo_carousel">
+                <ul class="bnnr_logo_strip">
                     ${trackHTML}
                 </ul>
             </div>
