@@ -42,3 +42,4 @@ jobs:
             phpunit.xml.dist
             phpstan.neon
             .php-cs-fixer.dist.php
+            var/**
