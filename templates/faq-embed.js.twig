@@ -99,6 +99,25 @@
         container.appendChild(item);
     });
 
+    // JSON-LD Structured Data
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": questions.map(q => ({
+            "@type": "Question",
+            "name": q.question,
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": q.answer
+            }
+        }))
+    };
+
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify(jsonLd);
+    document.head.appendChild(script);
+
     // Find script tag to insert after
     const scripts = document.getElementsByTagName('script');
     const currentScript = scripts[scripts.length - 1];
