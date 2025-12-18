@@ -22,7 +22,7 @@ class WidgetService
     /**
      * @throws WidgetNotFound
      */
-    public function updateWidget(string $id, ?string $title = null, array $attachmentsOrder = [], ?array $attachmentsLinks = null, ?int $imageSize = null, ?int $speed = null): Widget
+    public function updateWidget(string $id, ?string $title = null, array $attachmentsOrder = [], ?array $attachmentsLinks = null, ?int $imageSize = null, ?int $speed = null, ?bool $pauseOnHover = null, ?int $gap = null): Widget
     {
         $widget = $this->widgetRepository->findOneBy(['id' => $id]);
 
@@ -33,6 +33,10 @@ class WidgetService
         $widget->setTitle($title);
         $widget->setImageSize($imageSize);
         $widget->setSpeed($speed);
+        if ($pauseOnHover !== null) {
+            $widget->setPauseOnHover($pauseOnHover);
+        }
+        $widget->setGap($gap);
 
         foreach ($attachmentsOrder as $pos => $attId) {
             $att = $this->attachmentRepository->find($attId);
@@ -58,9 +62,13 @@ class WidgetService
         /** @var User $user */
         $user = $this->security->getUser();
 
-        return new Widget(
+        $widget = new Widget(
             $user,
             $action->title,
         );
+        $widget->setPauseOnHover($action->pauseOnHover);
+        $widget->setGap($action->gap);
+
+        return $widget;
     }
 }

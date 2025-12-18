@@ -11,6 +11,8 @@ final readonly class CreateWidgetAction
         public array $attachmentsOrder = [],
         public ?int $imageSize = null,
         public ?int $speed = null,
+        public bool $pauseOnHover = false,
+        public ?int $gap = null,
     ) {
     }
 }

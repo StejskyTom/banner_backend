@@ -6,10 +6,9 @@
     const widgetTitle = "{{ title }}";
 
     // Použij hodnoty z entity nebo default
-    const speed = '{{ speed ?: 25 }}s';
     const imgHeight = '{{ imageSize ?: 64 }}px';
     const imgMaxWidth = '120px';
-    const itemGap = '32px';
+    const itemGap = '{{ gap ?: 32 }}px';
     const maskLeft = '128px';
     const maskRight = '200px';
     const bg = '#ffffff';
@@ -33,7 +32,6 @@
             --item-gap: ${itemGap};
             --img-h: ${imgHeight};
             --img-max-w: ${imgMaxWidth};
-            --speed: ${speed};
             --mask-left: ${maskLeft};
             --mask-right: ${maskRight};
         }
@@ -63,6 +61,7 @@
             gap: var(--item-gap);
             width:max-content;
             animation: scroll var(--speed) linear infinite;
+            padding-right: var(--item-gap);
         }
         .bnnr_logo_strip img{
             height:var(--img-h);
@@ -78,6 +77,11 @@
         }
         .bnnr_logo_strip img:hover{ opacity:1; cursor: pointer; }
         .bnnr_logo_strip a:hover img{ opacity:1; }
+        {% if pauseOnHover %}
+        .bnnr_logo_carousel:hover .bnnr_logo_strip {
+            animation-play-state: paused;
+        }
+        {% endif %}
         @keyframes scroll{
             from { transform: translateX(0); }
             to   { transform: translateX(-50%); }
@@ -127,6 +131,14 @@
             }
             return imgTag;
         }).join('');
+
+        // Calculate duration: (items scrolled * baseSpeed) / 10
+        // We scroll half of the total items
+        const itemsScrolled = duplicatedLogos.length / 2;
+        const baseSpeed = {{ speed ?: 20 }};
+        const duration = (itemsScrolled * baseSpeed) / 10;
+
+        widgetContainer.style.setProperty('--speed', duration + 's');
 
         widgetContainer.innerHTML = `
             <h2>${widgetTitle}</h2>

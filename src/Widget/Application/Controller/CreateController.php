@@ -25,6 +25,8 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 #[Route('/api')]
 class CreateController extends AbstractController
@@ -34,6 +36,7 @@ class CreateController extends AbstractController
     public function __construct(
         MessageBusInterface $messageBus,
         private WidgetRepository $widgetRepository,
+        private CacheInterface $cache
     )
     {
         $this->messageBus = $messageBus;
@@ -69,40 +72,65 @@ class CreateController extends AbstractController
         $widget = $this->handle($action);
         $em->flush();
 
+        // Invalidate cache
+        $this->cache->delete('widget_embed_' . $widget->getId());
+
         return $this->json($widget, 200, [], ['groups' => ['widget:read']]);
     }
 
     #[Route('/widget/{widgetId}/embed.js', name: 'widget_embed')]
     public function generateWidgetJS(
+        Request $request,
         string $widgetId,
         SerializerInterface $serializer
     ): Response
     {
         /** @var Widget $widget */
         $widget = $this->widgetRepository->find($widgetId);
-        $attachments = $widget->getAttachments();
 
-        $attachmentsJson = $serializer->serialize(
-            $attachments,
-            'json',
-            [
-                'groups' => ['widget:read'],
-                'json_encode_options' => JSON_UNESCAPED_SLASHES
-            ]
-        );
+        if (!$widget) {
+            return new Response('// Widget not found', 404, ['Content-Type' => 'application/javascript']);
+        }
 
-        $jsTemplate = $this->renderView('embed.js.twig', [
-            'widgetId' => $widgetId,
-            'title' => $widget->getTitle(),
-            'attachments' => $attachmentsJson,
-            'speed' => $widget->getSpeed(),
-            'imageSize' => $widget->getImageSize(),
-        ]);
+        $response = new Response();
+        $response->setLastModified($widget->getUpdatedAt());
+        $response->setPublic();
 
-        $response = new Response($jsTemplate);
+        // Check if the response has not been modified
+        if ($response->isNotModified($request)) {
+            return $response;
+        }
+
+        $content = $this->cache->get('widget_embed_' . $widgetId, function (ItemInterface $item) use ($widget, $serializer) {
+            $item->expiresAfter(3600 * 24); // Server cache for 24 hours
+
+            $attachments = $widget->getAttachments();
+
+            $attachmentsJson = $serializer->serialize(
+                $attachments,
+                'json',
+                [
+                    'groups' => ['widget:read'],
+                    'json_encode_options' => JSON_UNESCAPED_SLASHES
+                ]
+            );
+
+            return $this->renderView('embed.js.twig', [
+                'widgetId' => $widget->getId(),
+                'title' => $widget->getTitle(),
+                'attachments' => $attachmentsJson,
+                'speed' => $widget->getSpeed(),
+                'imageSize' => $widget->getImageSize(),
+                'pauseOnHover' => $widget->getPauseOnHover(),
+                'gap' => $widget->getGap(),
+            ]);
+        });
+
+        $response->setContent($content);
         $response->headers->set('Content-Type', 'application/javascript');
         $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Cache-Control', 'public, max-age=300'); // 5min cache
+        // Force browser to revalidate with server every time
+        $response->headers->set('Cache-Control', 'public, no-cache');
 
         return $response;
     }
@@ -213,6 +241,9 @@ class CreateController extends AbstractController
             $em->persist($attachment);
             $em->flush();
 
+            // Invalidate cache
+            $this->cache->delete('widget_embed_' . $widget->getId());
+
             return $this->json($attachment, 201, [], ['groups' => ['widget:read']]);
 
         } catch (\Exception $exception) {
@@ -234,6 +265,9 @@ class CreateController extends AbstractController
         $em->remove($attachment);
         $em->flush();
 
+        // Invalidate cache
+        $this->cache->delete('widget_embed_' . $widget->getId());
+
         return $this->json([
             'message' => 'Attachment byl úspěšně odstraněn',
             'id' => $attachment->getId(),
@@ -250,6 +284,9 @@ class CreateController extends AbstractController
 
         $em->remove($widget);
         $em->flush();
+
+        // Invalidate cache
+        $this->cache->delete('widget_embed_' . $widget->getId());
 
         return $this->json([
             'message' => 'Widget byl úspěšně odstraněn',

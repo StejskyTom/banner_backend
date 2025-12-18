@@ -44,3 +44,4 @@ jobs:
             .php-cs-fixer.dist.php
             var/**
             vendor/**
+            config/**

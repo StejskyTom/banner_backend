@@ -19,6 +19,8 @@ use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
+use Symfony\Contracts\Cache\CacheInterface;
+
 #[Route('/api/heureka')]
 class HeurekaFeedController extends AbstractController
 {
@@ -27,6 +29,7 @@ class HeurekaFeedController extends AbstractController
     public function __construct(
         MessageBusInterface $messageBus,
         private HeurekaFeedRepository $feedRepository,
+        private CacheInterface $cache
     ) {
         $this->messageBus = $messageBus;
     }
@@ -95,6 +98,9 @@ class HeurekaFeedController extends AbstractController
 
         $updatedFeed = $this->handle($action);
 
+        // Invalidate cache
+        $this->cache->delete('heureka_product_embed_' . $feed->getId());
+
         return $this->json($updatedFeed, 200, [], ['groups' => ['feed:read']]);
     }
 
@@ -112,6 +118,9 @@ class HeurekaFeedController extends AbstractController
 
         $em->remove($feed);
         $em->flush();
+
+        // Invalidate cache
+        $this->cache->delete('heureka_product_embed_' . $feed->getId());
 
         return $this->json([
             'message' => 'Feed byl úspěšně smazán',
@@ -132,6 +141,9 @@ class HeurekaFeedController extends AbstractController
         try {
             $action = new SyncFeedAction(feedId: (string) $feed->getId());
             $stats = $this->handle($action);
+
+            // Invalidate cache
+            $this->cache->delete('heureka_product_embed_' . $feed->getId());
 
             return $this->json([
                 'message' => 'Synchronizace proběhla úspěšně',

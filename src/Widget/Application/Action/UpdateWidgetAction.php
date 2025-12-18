@@ -15,6 +15,8 @@ final readonly class UpdateWidgetAction
         public ?array $attachmentsLinks = null,
         public ?int $imageSize = null,
         public ?int $speed = null,
+        public ?bool $pauseOnHover = null,
+        public ?int $gap = null,
     ) {
     }
 }

@@ -13,13 +13,17 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
 
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+
 #[Route('/api/faq-widgets')]
 class FaqWidgetController extends AbstractController
 {
     public function __construct(
         private FaqWidgetRepository $repository,
         private EntityManagerInterface $entityManager,
-        private SerializerInterface $serializer
+        private SerializerInterface $serializer,
+        private CacheInterface $cache
     ) {}
 
     #[Route('', methods: ['GET'])]
@@ -81,6 +85,9 @@ class FaqWidgetController extends AbstractController
 
         $this->entityManager->flush();
 
+        // Invalidate cache
+        $this->cache->delete('faq_widget_embed_' . $widget->getId());
+
         return $this->json($widget, 200, [], ['groups' => 'faq_widget:read']);
     }
 
@@ -95,17 +102,36 @@ class FaqWidgetController extends AbstractController
         $this->entityManager->remove($widget);
         $this->entityManager->flush();
 
+        // Invalidate cache
+        $this->cache->delete('faq_widget_embed_' . $widget->getId());
+
         return $this->json(null, 204);
     }
 
     #[Route('/{id}/embed.js', methods: ['GET'])]
-    public function embed(FaqWidget $widget): Response
+    public function embed(Request $request, FaqWidget $widget): Response
     {
-        $response = new Response($this->renderView('faq-embed.js.twig', [
-            'widget' => $widget,
-        ]));
+        $response = new Response();
+        $response->setLastModified($widget->getUpdatedAt());
+        $response->setPublic();
         
+        // Check if the response has not been modified
+        if ($response->isNotModified($request)) {
+            return $response;
+        }
+
+        $content = $this->cache->get('faq_widget_embed_' . $widget->getId(), function (ItemInterface $item) use ($widget) {
+            $item->expiresAfter(3600 * 24); // Server cache for 24 hours
+            
+            return $this->renderView('faq-embed.js.twig', [
+                'widget' => $widget,
+            ]);
+        });
+
+        $response->setContent($content);
         $response->headers->set('Content-Type', 'application/javascript');
+        // Force browser to revalidate with server every time
+        $response->headers->set('Cache-Control', 'public, no-cache');
         
         return $response;
     }

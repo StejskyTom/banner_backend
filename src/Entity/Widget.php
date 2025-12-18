@@ -12,6 +12,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: WidgetRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Widget
 {
     #[ORM\Id]
@@ -114,5 +115,53 @@ class Widget
     public function setSpeed(?int $speed): void
     {
         $this->speed = $speed;
+    }
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    #[Groups(['widget:read'])]
+    private bool $pauseOnHover = false;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    #[Groups(['widget:read'])]
+    private ?\DateTimeInterface $updatedAt = null;
+
+    public function getPauseOnHover(): bool
+    {
+        return $this->pauseOnHover;
+    }
+
+    public function setPauseOnHover(bool $pauseOnHover): void
+    {
+        $this->pauseOnHover = $pauseOnHover;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeInterface $updatedAt): void
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+    #[ORM\Column(type: 'integer', nullable: true)]
+    #[Groups(['widget:read'])]
+    private ?int $gap = null;
+
+    public function getGap(): ?int
+    {
+        return $this->gap;
+    }
+
+    public function setGap(?int $gap): void
+    {
+        $this->gap = $gap;
+    }
+
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
+    public function updateTimestamp(): void
+    {
+        $this->updatedAt = new \DateTimeImmutable();
     }
 }

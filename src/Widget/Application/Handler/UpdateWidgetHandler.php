@@ -31,7 +31,9 @@ readonly class UpdateWidgetHandler
                 $action->attachmentsOrder,
                 $action->attachmentsLinks,
                 $action->imageSize,
-                $action->speed
+                $action->speed,
+                $action->pauseOnHover,
+                $action->gap
             );
 
             $this->logger->info('Widget byl úspěšně uložen', [

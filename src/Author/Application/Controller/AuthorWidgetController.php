@@ -14,13 +14,17 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+
 #[Route('/api/author-widgets')]
 class AuthorWidgetController extends AbstractController
 {
     public function __construct(
         private AuthorWidgetRepository $repository,
         private EntityManagerInterface $entityManager,
-        private SerializerInterface $serializer
+        private SerializerInterface $serializer,
+        private CacheInterface $cache
     ) {}
 
     #[Route('', methods: ['GET'])]
@@ -88,6 +92,9 @@ class AuthorWidgetController extends AbstractController
 
         $this->entityManager->flush();
 
+        // Invalidate cache
+        $this->cache->delete('author_widget_embed_' . $widget->getId());
+
         return $this->json($widget, 200, [], ['groups' => 'author_widget:read']);
     }
 
@@ -102,17 +109,36 @@ class AuthorWidgetController extends AbstractController
         $this->entityManager->remove($widget);
         $this->entityManager->flush();
 
+        // Invalidate cache
+        $this->cache->delete('author_widget_embed_' . $widget->getId());
+
         return $this->json(null, 204);
     }
 
     #[Route('/{id}/embed.js', methods: ['GET'])]
-    public function embed(AuthorWidget $widget): Response
+    public function embed(Request $request, AuthorWidget $widget): Response
     {
-        $response = new Response($this->renderView('author-embed.js.twig', [
-            'widget' => $widget,
-        ]));
+        $response = new Response();
+        $response->setLastModified($widget->getUpdatedAt());
+        $response->setPublic();
         
+        // Check if the response has not been modified
+        if ($response->isNotModified($request)) {
+            return $response;
+        }
+
+        $content = $this->cache->get('author_widget_embed_' . $widget->getId(), function (ItemInterface $item) use ($widget) {
+            $item->expiresAfter(3600 * 24); // Server cache for 24 hours
+            
+            return $this->renderView('author-embed.js.twig', [
+                'widget' => $widget,
+            ]);
+        });
+
+        $response->setContent($content);
         $response->headers->set('Content-Type', 'application/javascript');
+        // Force browser to revalidate with server every time
+        $response->headers->set('Cache-Control', 'public, no-cache');
         
         return $response;
     }
@@ -166,6 +192,9 @@ class AuthorWidgetController extends AbstractController
         $widget->setUpdatedAt(new \DateTimeImmutable());
         
         $this->entityManager->flush();
+
+        // Invalidate cache
+        $this->cache->delete('author_widget_embed_' . $widget->getId());
 
         return $this->json([
             'url' => $publicUrl
