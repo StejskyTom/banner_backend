@@ -1,0 +1,195 @@
+(function() {
+    'use strict';
+
+    const widgetId = '{{ widget.id }}';
+    const content = {{ content|json_encode|raw }};
+    const title = '{{ widget.name|e('js') }}';
+
+    let currentScript = document.currentScript;
+    if (!currentScript) {
+        const scripts = document.getElementsByTagName('script');
+        currentScript = scripts[scripts.length - 1];
+    }
+
+    const container = document.createElement('div');
+    container.id = 'article-widget-' + widgetId + '-' + Date.now();
+    container.className = 'bnnr_article_wrapper';
+
+    // Logic to determine where to insert the widget
+    if (currentScript && currentScript.parentNode && currentScript.parentNode.tagName !== 'HEAD') {
+        currentScript.parentNode.insertBefore(container, currentScript);
+    } else {
+        if (document.body) {
+            document.body.appendChild(container);
+        } else {
+            document.addEventListener('DOMContentLoaded', function() {
+                document.body.appendChild(container);
+            });
+        }
+    }
+
+    // Styles
+    const styles = `
+        .bnnr_article_wrapper {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 100%;
+            margin: 0 auto;
+            color: #374151;
+            line-height: 1.6;
+            box-sizing: border-box;
+        }
+        .bnnr_article_title {
+            text-align: center;
+            color: #111827;
+            font-size: 28px;
+            margin-bottom: 32px;
+            font-weight: 700;
+        }
+        .bnnr_block {
+            margin-bottom: 24px;
+        }
+        .bnnr_text {
+            font-size: 16px;
+            color: #374151;
+            margin: 0;
+        }
+        .bnnr_img_container {
+            text-align: center;
+        }
+        .bnnr_img {
+            border-radius: 8px;
+            max-width: 100%;
+            height: auto;
+        }
+        .bnnr_wrap_container {
+            width: 100%;
+            overflow: hidden;
+        }
+        .bnnr_wrap_img {
+            border-radius: 8px;
+            margin-bottom: 16px;
+            max-width: 100%;
+            height: auto;
+        }
+        .bnnr_float_left {
+            float: left;
+            margin-right: 24px;
+        }
+        .bnnr_float_right {
+            float: right;
+            margin-left: 24px;
+        }
+        .bnnr_banner {
+            background: #f3f4f6;
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 4px solid #4f46e5;
+        }
+        .bnnr_banner_text {
+            color: #111827;
+            margin: 0;
+            text-transform: uppercase;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .bnnr_product {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .bnnr_product_img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        .bnnr_product_name {
+            color: #111827;
+            margin: 0 0 16px 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .bnnr_product_btn {
+            background: #4f46e5;
+            color: white !important;
+            padding: 10px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            display: inline-block;
+            transition: background-color 0.2s;
+        }
+        .bnnr_product_btn:hover {
+            background: #4338ca;
+        }
+        .bnnr_clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+        
+        @media(max-width: 768px) {
+            .bnnr_wrap_img {
+                float: none !important;
+                width: 100% !important;
+                margin: 0 0 16px 0 !important;
+                display: block !important;
+            }
+        }
+    `;
+
+    if (!document.getElementById('bnnr-article-styles-v3')) {
+        const styleSheet = document.createElement('style');
+        styleSheet.id = 'bnnr-article-styles-v3';
+        styleSheet.textContent = styles;
+        document.head.appendChild(styleSheet);
+    }
+
+    // Render Blocks
+    let html = `<div class="bnnr_article_inner">`;
+    // html += `<h1 class="bnnr_article_title">${title}</h1>`; // Option to hide title in embed
+
+    content.forEach(block => {
+        const margin = `margin-bottom: ${block.margin || 24}px;`;
+        
+        if (block.type === 'text') {
+            html += `<p class="bnnr_text" style="${margin}">${(block.content || '').replace(/\n/g, '<br>')}</p>`;
+        } 
+        else if (block.type === 'image') {
+            html += `<div class="bnnr_img_container" style="${margin}">
+                <img src="${block.url}" style="width: ${block.width}%;" class="bnnr_img" alt="">
+            </div>`;
+        }
+        else if (block.type === 'wrap') {
+            const floatClass = block.imgPos === 'left' ? 'bnnr_float_left' : 'bnnr_float_right';
+            html += `<div class="bnnr_wrap_container bnnr_clearfix" style="${margin}">
+                ${block.imgUrl ? `<img src="${block.imgUrl}" class="bnnr_wrap_img ${floatClass}" style="width: ${block.imgWidth}%" alt="">` : ''}
+                <p class="bnnr_text">${(block.text || '').replace(/\n/g, '<br>')}</p>
+            </div>`;
+        }
+        else if (block.type === 'banner') {
+            html += `<div class="bnnr_banner" style="${margin}">
+                <h2 class="bnnr_banner_text">${block.content}</h2>
+            </div>`;
+        }
+        else if (block.type === 'product') {
+            html += `<div class="bnnr_product" style="${margin}">
+                ${block.imgUrl ? `<img src="${block.imgUrl}" class="bnnr_product_img" alt="">` : ''}
+                <h3 class="bnnr_product_name">${block.name}</h3>
+                ${block.link ? `<a href="${block.link}" target="_blank" class="bnnr_product_btn">Koupit</a>` : ''}
+            </div>`;
+        }
+    });
+
+    html += `</div>`; // End inner
+    container.innerHTML = html;
+
+})();
