@@ -135,8 +135,20 @@ class ArticleWidgetController extends AbstractController
         $newFilename = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
 
         try {
+            $publicDir = $this->getParameter('app.public_dir');
+            
+            // Auto-detection for shared hosting (Endora)
+            if ($publicDir === 'public' && is_dir($this->getParameter('kernel.project_dir') . '/public_html')) {
+                $publicDir = 'public_html';
+            }
+
+            $dir = $this->getParameter('kernel.project_dir') . '/' . $publicDir . '/uploads/article_images';
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0775, true);
+            }
+
             $file->move(
-                $this->getParameter('kernel.project_dir') . '/public/uploads/article_images',
+                $dir,
                 $newFilename
             );
         } catch (FileException $e) {
