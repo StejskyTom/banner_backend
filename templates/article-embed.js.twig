@@ -247,7 +247,7 @@
             html += `<div class="bnnr_product" style="${margin}">
                 ${block.imgUrl ? `<img src="${block.imgUrl}" class="bnnr_product_img" alt="">` : ''}
                 <h3 class="bnnr_product_name">${block.name}</h3>
-                ${block.link ? `<a href="${block.link}" target="_blank" class="bnnr_product_btn" style="background-color: ${block.btnColor || '#4f46e5'}">${block.btnText || 'Koupit'}</a>` : ''}
+                ${block.link ? `<a href="${block.link}" target="_blank" class="bnnr_product_btn" style="background-color: ${block.btnColor || '#4f46e5'}">Koupit</a>` : ''}
             </div>`;
         }
         else if (block.type === 'author') {

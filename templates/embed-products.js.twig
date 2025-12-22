@@ -271,7 +271,7 @@
                 <div class="bnnr_prod_title">${product.productName}</div>
                 <div class="bnnr_prod_price">${parseFloat(product.priceVat).toLocaleString('cs-CZ')} Kč</div>
                 <a href="${product.url}" target="_blank" rel="noopener noreferrer" class="bnnr_buy_btn">
-                    Koupit
+                    ${options.buttonText || 'Koupit'}
                 </a>
             </div>
         `;
