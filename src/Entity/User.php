@@ -48,10 +48,59 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: HeurekaFeed::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $heurekaFeeds;
 
+    /**
+     * @var Collection<int, Subscription>
+     */
+    #[ORM\OneToMany(targetEntity: Subscription::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $subscriptions;
+
     public function __construct()
     {
         $this->widgets = new ArrayCollection();
         $this->heurekaFeeds = new ArrayCollection();
+        $this->subscriptions = new ArrayCollection();
+    }
+
+    // ... existing methods ...
+
+    /**
+     * @return Collection<int, Subscription>
+     */
+    public function getSubscriptions(): Collection
+    {
+        return $this->subscriptions;
+    }
+
+    public function addSubscription(Subscription $subscription): static
+    {
+        if (!$this->subscriptions->contains($subscription)) {
+            $this->subscriptions->add($subscription);
+            $subscription->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSubscription(Subscription $subscription): static
+    {
+        if ($this->subscriptions->removeElement($subscription)) {
+            // set the owning side to null (unless already changed)
+            if ($subscription->getUser() === $this) {
+                $subscription->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function hasActiveSubscription(): bool
+    {
+        foreach ($this->subscriptions as $subscription) {
+            if ($subscription->getStatus() === 'active' && $subscription->getEndDate() > new \DateTime()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function getId(): ?Uuid

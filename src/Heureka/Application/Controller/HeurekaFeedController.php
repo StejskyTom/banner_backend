@@ -66,6 +66,16 @@ class HeurekaFeedController extends AbstractController
     public function createFeed(
         #[MapRequestPayload] CreateFeedRequest $request
     ): JsonResponse {
+        /** @var User $user */
+        $user = $this->getUser();
+        if (!$user) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if (!$user->hasActiveSubscription()) {
+            return $this->json(['error' => 'Active subscription required'], 403);
+        }
+
         $action = new CreateFeedAction(
             url: $request->url,
             name: $request->name

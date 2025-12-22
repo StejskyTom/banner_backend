@@ -60,6 +60,10 @@ class ArticleWidgetController extends AbstractController
             return $this->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
         }
 
+        if (!$user->hasActiveSubscription()) {
+            return $this->json(['error' => 'Active subscription required'], Response::HTTP_FORBIDDEN);
+        }
+
         $data = json_decode($request->getContent(), true);
         
         $widget = new ArticleWidget();

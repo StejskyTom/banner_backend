@@ -47,6 +47,16 @@ class CreateController extends AbstractController
         #[MapRequestPayload] CreateWidgetAction $action,
         EntityManagerInterface $em
     ): JsonResponse {
+        /** @var User $user */
+        $user = $this->getUser();
+        if (!$user) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if (!$user->hasActiveSubscription()) {
+            return $this->json(['error' => 'Active subscription required'], 403);
+        }
+
         $widget = $this->handle($action);
         $em->persist($widget);
         $em->flush();
