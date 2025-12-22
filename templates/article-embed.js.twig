@@ -52,7 +52,17 @@
             font-size: 16px;
             color: #374151;
             margin: 0;
+            display: block;
+            width: auto;
+            overflow: visible;
         }
+        .bnnr_text p {
+            margin: 0 0 8px 0;
+        }
+        .bnnr_text h1 { font-size: 2em; font-weight: bold; margin: 0 0 8px 0; }
+        .bnnr_text h2 { font-size: 1.5em; font-weight: bold; margin: 0 0 8px 0; }
+        .bnnr_text h3 { font-size: 1.17em; font-weight: bold; margin: 0 0 8px 0; }
+        
         .bnnr_img_container {
             text-align: center;
         }
@@ -214,16 +224,20 @@
     // html += `<h1 class="bnnr_article_title">${title}</h1>`; // Option to hide title in embed
 
     content.forEach(block => {
-        const margin = `margin-bottom: ${block.margin || 24}px;`;
+        const margin = `margin-bottom: ${block.margin !== undefined ? block.margin : 24}px;`;
         
         if (block.type === 'text') {
-            const tag = block.tag || 'p';
-            const fontSize = tag === 'h1' ? '2em' : tag === 'h2' ? '1.5em' : tag === 'h3' ? '1.17em' : '1em';
-            const fontWeight = tag.startsWith('h') ? 'bold' : (block.bold ? 'bold' : 'normal');
-            const fontStyle = block.italic ? 'italic' : 'normal';
             const align = block.align ? `text-align: ${block.align};` : '';
             
-            html += `<${tag} class="bnnr_text" style="${margin} font-size: ${fontSize}; font-weight: ${fontWeight}; font-style: ${fontStyle}; ${align}">${(block.content || '').replace(/\n/g, '<br>')}</${tag}>`;
+            // Fallback for old content: replace \n with <br> if no HTML tags found? 
+            // Or just output content. ContentEditable usually puts <div> or <p>.
+            // If it's old plain text, it will just be text.
+            let content = block.content || '';
+            if (!content.includes('<') && content.includes('\n')) {
+                 content = content.replace(/\n/g, '<br>');
+            }
+            
+            html += `<div class="bnnr_text" style="${margin} ${align}">${content}</div>`;
         } 
         else if (block.type === 'image') {
             const align = block.align ? `text-align: ${block.align};` : '';
@@ -233,9 +247,15 @@
         }
         else if (block.type === 'wrap') {
             const floatClass = block.imgPos === 'left' ? 'bnnr_float_left' : 'bnnr_float_right';
+            
+            let content = block.content || block.text || '';
+             if (!content.includes('<') && content.includes('\n')) {
+                 content = content.replace(/\n/g, '<br>');
+            }
+
             html += `<div class="bnnr_wrap_container bnnr_clearfix" style="${margin}">
                 ${block.imgUrl ? `<img src="${block.imgUrl}" class="bnnr_wrap_img ${floatClass}" style="width: ${block.imgWidth}%" alt="">` : ''}
-                <p class="bnnr_text">${(block.text || '').replace(/\n/g, '<br>')}</p>
+                <div class="bnnr_text">${content}</div>
             </div>`;
         }
         else if (block.type === 'banner') {
