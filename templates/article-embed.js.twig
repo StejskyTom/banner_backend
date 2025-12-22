@@ -125,7 +125,18 @@
             color: #111827;
             margin: 0 0 16px 0;
             font-size: 18px;
+            font-size: 18px;
             font-weight: 600;
+        }
+        .bnnr_product_desc {
+            color: #4b5563;
+            font-size: 14px;
+            line-height: 1.4;
+            margin: 0 0 16px 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
         .bnnr_product_btn {
             background: #4f46e5;
@@ -210,6 +221,21 @@
             margin: 0;
             line-height: 1.4;
         }
+        .bnnr_table_container {
+            overflow-x: auto;
+        }
+        .bnnr_table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow: hidden;
+        }
+        .bnnr_table th, .bnnr_table td {
+            padding: 12px 16px;
+        }
+        .bnnr_table th {
+            font-weight: 600;
+        }
     `;
 
     if (!document.getElementById('bnnr-article-styles-v4')) {
@@ -267,6 +293,7 @@
             html += `<div class="bnnr_product" style="${margin}">
                 ${block.imgUrl ? `<img src="${block.imgUrl}" class="bnnr_product_img" alt="">` : ''}
                 <h3 class="bnnr_product_name">${block.name}</h3>
+                ${block.description ? `<p class="bnnr_product_desc">${block.description}</p>` : ''}
                 ${block.link ? `<a href="${block.link}" target="_blank" class="bnnr_product_btn" style="background-color: ${block.btnColor || '#4f46e5'}">Koupit</a>` : ''}
             </div>`;
         }
@@ -282,6 +309,49 @@
                     ${block.authorBio ? `<p class="bnnr_author_bio">${block.authorBio}</p>` : ''}
                 </div>
             </div>`;
+        }
+        else if (block.type === 'table') {
+            const borderColor = '#e5e7eb';
+            const borderStyle = block.borderStyle || 'full';
+            const outerBorder = block.outerBorder !== false;
+            const width = block.width || 100;
+            const textAlign = block.textAlign || 'left';
+            const radius = block.borderRadius !== undefined ? block.borderRadius : 8;
+            
+            const tableStyle = `
+                width: ${width}%;
+                text-align: ${textAlign};
+                border: ${outerBorder ? `1px solid ${borderColor}` : 'none'};
+                border-radius: ${radius}px;
+                border-collapse: separate;
+                border-spacing: 0;
+            `;
+            
+            let tableHtml = `<div class="bnnr_table_container" style="${margin}">
+                <table class="bnnr_table" style="${tableStyle}" cellspacing="0" cellpadding="0">
+                    <thead>
+                        <tr>`;
+            
+            (block.header || []).forEach((head, i) => {
+                const borderBottom = borderStyle !== 'none' ? `border-bottom: 1px solid ${borderColor};` : '';
+                const borderRight = borderStyle === 'full' && i < (block.header.length - 1) ? `border-right: 1px solid ${borderColor};` : '';
+                tableHtml += `<th style="background: ${block.headerBgColor || '#f3f4f6'}; color: ${block.headerTextColor || '#111827'}; ${borderBottom} ${borderRight}">${head}</th>`;
+            });
+            
+            tableHtml += `</tr></thead><tbody>`;
+            
+            (block.data || []).forEach((row, rowIndex) => {
+                tableHtml += `<tr>`;
+                row.forEach((cell, colIndex) => {
+                    const borderBottom = borderStyle !== 'none' && rowIndex < (block.data.length - 1) ? `border-bottom: 1px solid ${borderColor};` : '';
+                    const borderRight = borderStyle === 'full' && colIndex < (row.length - 1) ? `border-right: 1px solid ${borderColor};` : '';
+                    tableHtml += `<td style="${borderBottom} ${borderRight}">${cell}</td>`;
+                });
+                tableHtml += `</tr>`;
+            });
+            
+            tableHtml += `</tbody></table></div>`;
+            html += tableHtml;
         }
     });
 
