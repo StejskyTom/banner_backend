@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\HeurekaFeed;
 use App\Entity\Product;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -130,5 +131,18 @@ class ProductRepository extends ServiceEntityRepository
             ->setParameter('itemId', $itemId)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    public function searchByUser(User $user, string $search, int $limit = 10): array
+    {
+        return $this->createQueryBuilder('p')
+            ->join('p.feed', 'f')
+            ->where('f.user = :user')
+            ->andWhere('p.productName LIKE :search OR p.description LIKE :search')
+            ->setParameter('user', $user->getId()->toBinary())
+            ->setParameter('search', '%' . $search . '%')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
     }
 }

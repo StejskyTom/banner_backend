@@ -119,4 +119,26 @@ class ProductController extends AbstractController
 
         return $this->json($products, 200, [], ['groups' => ['product:read']]);
     }
+
+    #[Route('/products/search', name: 'api_heureka_products_search', methods: ['GET'])]
+    public function searchProducts(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (!$user) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $search = $request->query->get('search');
+        $limit = (int) $request->query->get('limit', 10);
+
+        if (!$search || strlen($search) < 3) {
+            return $this->json([], 200);
+        }
+
+        $products = $this->productRepository->searchByUser($user, $search, $limit);
+
+        return $this->json(['products' => $products], 200, [], ['groups' => ['product:read']]);
+    }
 }

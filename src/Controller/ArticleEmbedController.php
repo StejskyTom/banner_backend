@@ -16,6 +16,7 @@ class ArticleEmbedController extends AbstractController
         $response = new Response();
         $response->headers->set('Content-Type', 'application/javascript');
         $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Cache-Control', 'no-cache, no-store, must-revalidate');
 
         $content = $this->renderView('article-embed.js.twig', [
             'widget' => $widget,
