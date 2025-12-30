@@ -55,6 +55,26 @@ class AuthorWidget
     #[Groups(['author_widget:read'])]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['author_widget:read', 'author_widget:write'])]
+    private ?string $backgroundColor = null;
+
+    #[ORM\Column(type: Types::INTEGER, nullable: true, options: ['default' => 0])]
+    #[Groups(['author_widget:read', 'author_widget:write'])]
+    private ?int $borderRadius = 0;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['author_widget:read', 'author_widget:write'])]
+    private ?string $nameColor = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['author_widget:read', 'author_widget:write'])]
+    private ?string $bioColor = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['author_widget:read', 'author_widget:write'])]
+    private ?string $titleColor = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -146,6 +166,66 @@ class AuthorWidget
     public function setLayout(string $layout): static
     {
         $this->layout = $layout;
+
+        return $this;
+    }
+
+    public function getBackgroundColor(): ?string
+    {
+        return $this->backgroundColor;
+    }
+
+    public function setBackgroundColor(?string $backgroundColor): static
+    {
+        $this->backgroundColor = $backgroundColor;
+
+        return $this;
+    }
+
+    public function getBorderRadius(): ?int
+    {
+        return $this->borderRadius;
+    }
+
+    public function setBorderRadius(?int $borderRadius): static
+    {
+        $this->borderRadius = $borderRadius;
+
+        return $this;
+    }
+
+    public function getNameColor(): ?string
+    {
+        return $this->nameColor;
+    }
+
+    public function setNameColor(?string $nameColor): static
+    {
+        $this->nameColor = $nameColor;
+
+        return $this;
+    }
+
+    public function getBioColor(): ?string
+    {
+        return $this->bioColor;
+    }
+
+    public function setBioColor(?string $bioColor): static
+    {
+        $this->bioColor = $bioColor;
+
+        return $this;
+    }
+
+    public function getTitleColor(): ?string
+    {
+        return $this->titleColor;
+    }
+
+    public function setTitleColor(?string $titleColor): static
+    {
+        $this->titleColor = $titleColor;
 
         return $this;
     }

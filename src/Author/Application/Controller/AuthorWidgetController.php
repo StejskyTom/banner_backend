@@ -53,6 +53,11 @@ class AuthorWidgetController extends AbstractController
         if (isset($data['authorBio'])) $widget->setAuthorBio($data['authorBio']);
         if (isset($data['authorPhotoUrl'])) $widget->setAuthorPhotoUrl($data['authorPhotoUrl']);
         if (isset($data['layout'])) $widget->setLayout($data['layout']);
+        if (isset($data['backgroundColor'])) $widget->setBackgroundColor($data['backgroundColor']);
+        if (isset($data['borderRadius'])) $widget->setBorderRadius((int)$data['borderRadius']);
+        if (isset($data['nameColor'])) $widget->setNameColor($data['nameColor']);
+        if (isset($data['bioColor'])) $widget->setBioColor($data['bioColor']);
+        if (isset($data['titleColor'])) $widget->setTitleColor($data['titleColor']);
 
         $this->entityManager->persist($widget);
         $this->entityManager->flush();
@@ -87,6 +92,11 @@ class AuthorWidgetController extends AbstractController
         if (isset($data['authorBio'])) $widget->setAuthorBio($data['authorBio']);
         if (isset($data['authorPhotoUrl'])) $widget->setAuthorPhotoUrl($data['authorPhotoUrl']);
         if (isset($data['layout'])) $widget->setLayout($data['layout']);
+        if (isset($data['backgroundColor'])) $widget->setBackgroundColor($data['backgroundColor']);
+        if (isset($data['borderRadius'])) $widget->setBorderRadius((int)$data['borderRadius']);
+        if (isset($data['nameColor'])) $widget->setNameColor($data['nameColor']);
+        if (isset($data['bioColor'])) $widget->setBioColor($data['bioColor']);
+        if (isset($data['titleColor'])) $widget->setTitleColor($data['titleColor']);
         
         $widget->setUpdatedAt(new \DateTimeImmutable());
 

@@ -39,6 +39,26 @@ class FaqWidget
     #[Groups(['faq_widget:read'])]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    #[ORM\Column(length: 50, nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?string $font = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?string $questionColor = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?string $answerColor = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?string $hoverColor = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?string $backgroundColor = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -83,6 +103,66 @@ class FaqWidget
     public function setQuestions(array $questions): static
     {
         $this->questions = $questions;
+
+        return $this;
+    }
+
+    public function getFont(): ?string
+    {
+        return $this->font;
+    }
+
+    public function setFont(?string $font): static
+    {
+        $this->font = $font;
+
+        return $this;
+    }
+
+    public function getQuestionColor(): ?string
+    {
+        return $this->questionColor;
+    }
+
+    public function setQuestionColor(?string $questionColor): static
+    {
+        $this->questionColor = $questionColor;
+
+        return $this;
+    }
+
+    public function getAnswerColor(): ?string
+    {
+        return $this->answerColor;
+    }
+
+    public function setAnswerColor(?string $answerColor): static
+    {
+        $this->answerColor = $answerColor;
+
+        return $this;
+    }
+
+    public function getHoverColor(): ?string
+    {
+        return $this->hoverColor;
+    }
+
+    public function setHoverColor(?string $hoverColor): static
+    {
+        $this->hoverColor = $hoverColor;
+
+        return $this;
+    }
+
+    public function getBackgroundColor(): ?string
+    {
+        return $this->backgroundColor;
+    }
+
+    public function setBackgroundColor(?string $backgroundColor): static
+    {
+        $this->backgroundColor = $backgroundColor;
 
         return $this;
     }

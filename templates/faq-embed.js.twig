@@ -5,97 +5,83 @@
     // Create container
     const container = document.createElement('div');
     container.id = widgetId;
-    container.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+    container.style.fontFamily = '{{ widget.font|default("sans-serif") }}';
     container.style.maxWidth = '800px';
     container.style.margin = '0 auto';
     container.style.padding = '20px';
+    container.style.backgroundColor = '{{ widget.backgroundColor|default("transparent") }}';
 
     // Create styles
     const style = document.createElement('style');
     style.textContent = `
         #${widgetId} .bnnr_faq_item {
             border-bottom: 1px solid #e5e7eb;
-            margin-bottom: 10px;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
         }
-        #${widgetId} .bnnr_faq_question {
-            width: 100%;
-            text-align: left;
-            padding: 16px 0;
-            background: none;
-            border: none;
+        #${widgetId} .bnnr_faq_item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+        #${widgetId} details > summary {
+            list-style: none;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 18px;
-            font-weight: 600;
-            color: #111827;
+            padding: 8px 0;
+            font-weight: 500;
+            color: {{ widget.questionColor|default('#111827') }};
             transition: color 0.2s;
         }
-        #${widgetId} .bnnr_faq_question:hover {
-            color: #4f46e5;
+        #${widgetId} details > summary::-webkit-details-marker {
+            display: none;
+        }
+        #${widgetId} details > summary:hover {
+            color: {{ widget.hoverColor|default('#4f46e5') }};
         }
         #${widgetId} .bnnr_faq_answer {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-            color: #4b5563;
+            color: {{ widget.answerColor|default('#6b7280') }};
             line-height: 1.6;
-        }
-        #${widgetId} .bnnr_faq_ans_content {
-            padding-bottom: 16px;
+            margin-top: 8px;
+            font-size: 14px;
         }
         #${widgetId} .bnnr_faq_icon {
             width: 24px;
             height: 24px;
-            transition: transform 0.3s;
+            transition: transform 0.2s;
             flex-shrink: 0;
             margin-left: 16px;
         }
-        #${widgetId} .bnnr_faq_item.bnnr_active .bnnr_faq_icon {
+        #${widgetId} details[open] .bnnr_faq_icon {
             transform: rotate(180deg);
-        }
-        #${widgetId} .bnnr_faq_item.bnnr_active .bnnr_faq_answer {
-            max-height: 500px; /* Approximate max height */
         }
     `;
     document.head.appendChild(style);
 
     // Render questions
-    questions.forEach((q, index) => {
+    questions.forEach((q) => {
         const item = document.createElement('div');
         item.className = 'bnnr_faq_item';
 
-        const button = document.createElement('button');
-        button.className = 'bnnr_faq_question';
-        button.innerHTML = `
+        const details = document.createElement('details');
+        
+        const summary = document.createElement('summary');
+        summary.innerHTML = `
             <span>${q.question}</span>
             <svg class="bnnr_faq_icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 9l6 6 6-6" />
             </svg>
         `;
 
         const answer = document.createElement('div');
         answer.className = 'bnnr_faq_answer';
-        answer.innerHTML = `<div class="bnnr_faq_ans_content">${q.answer}</div>`;
+        answer.innerHTML = q.answer;
 
-        button.addEventListener('click', () => {
-            const isActive = item.classList.contains('bnnr_active');
-            
-            // Close all others (optional - can be removed for multiple open)
-            container.querySelectorAll('.bnnr_faq_item').forEach(i => {
-                i.classList.remove('bnnr_active');
-                i.querySelector('.bnnr_faq_answer').style.maxHeight = null;
-            });
-
-            if (!isActive) {
-                item.classList.add('bnnr_active');
-                answer.style.maxHeight = answer.scrollHeight + 'px';
-            }
-        });
-
-        item.appendChild(button);
-        item.appendChild(answer);
+        details.appendChild(summary);
+        details.appendChild(answer);
+        item.appendChild(details);
         container.appendChild(item);
     });
 

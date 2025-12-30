@@ -46,6 +46,11 @@ class FaqWidgetController extends AbstractController
         $widget->setName($data['name'] ?? 'Nový FAQ');
         $widget->setUser($this->getUser());
         $widget->setQuestions($data['questions'] ?? []);
+        $widget->setFont($data['font'] ?? null);
+        $widget->setQuestionColor($data['questionColor'] ?? null);
+        $widget->setAnswerColor($data['answerColor'] ?? null);
+        $widget->setHoverColor($data['hoverColor'] ?? null);
+        $widget->setBackgroundColor($data['backgroundColor'] ?? null);
 
         $this->entityManager->persist($widget);
         $this->entityManager->flush();
@@ -79,6 +84,21 @@ class FaqWidgetController extends AbstractController
         }
         if (isset($data['questions'])) {
             $widget->setQuestions($data['questions']);
+        }
+        if (isset($data['font'])) {
+            $widget->setFont($data['font']);
+        }
+        if (isset($data['questionColor'])) {
+            $widget->setQuestionColor($data['questionColor']);
+        }
+        if (isset($data['answerColor'])) {
+            $widget->setAnswerColor($data['answerColor']);
+        }
+        if (isset($data['hoverColor'])) {
+            $widget->setHoverColor($data['hoverColor']);
+        }
+        if (isset($data['backgroundColor'])) {
+            $widget->setBackgroundColor($data['backgroundColor']);
         }
         
         $widget->setUpdatedAt(new \DateTimeImmutable());
