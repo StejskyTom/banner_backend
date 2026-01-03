@@ -42,6 +42,7 @@ security:
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
         - { path: ^/api/forgot-password, roles: PUBLIC_ACCESS }
         - { path: ^/api/reset-password, roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/google, roles: PUBLIC_ACCESS }
         - { path: ^/api/widget/.+/embed\.js$, roles: PUBLIC_ACCESS }
         - { path: ^/api/heureka/.+/embed\.js$, roles: PUBLIC_ACCESS }
