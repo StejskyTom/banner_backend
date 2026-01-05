@@ -50,6 +50,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read'])]
     private ?string $avatarUrl = null;
 
+    // Billing Information
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user:read', 'user:billing'])]
+    private ?string $billingName = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['user:read', 'user:billing'])]
+    private ?string $billingIco = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['user:read', 'user:billing'])]
+    private ?string $billingDic = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user:read', 'user:billing'])]
+    private ?string $billingStreet = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user:read', 'user:billing'])]
+    private ?string $billingCity = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['user:read', 'user:billing'])]
+    private ?string $billingZip = null;
+
+    #[ORM\Column(length: 2, nullable: true)]
+    #[Groups(['user:read', 'user:billing'])]
+    private ?string $billingCountry = 'CZ';
+
     /**
      * @var Collection<int, Widget>
      */
@@ -62,10 +91,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: HeurekaFeed::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $heurekaFeeds;
 
+    /**
+     * @var Collection<int, Subscription>
+     */
+    #[ORM\OneToMany(targetEntity: Subscription::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $subscriptions;
+
+    /**
+     * @var Collection<int, Payment>
+     */
+    #[ORM\OneToMany(targetEntity: Payment::class, mappedBy: 'user')]
+    private Collection $payments;
+
     public function __construct()
     {
         $this->widgets = new ArrayCollection();
         $this->heurekaFeeds = new ArrayCollection();
+        $this->subscriptions = new ArrayCollection();
+        $this->payments = new ArrayCollection();
     }
 
     public function getId(): ?Uuid
@@ -241,6 +284,150 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setAvatarUrl(?string $avatarUrl): static
     {
         $this->avatarUrl = $avatarUrl;
+
+        return $this;
+    }
+
+    public function getBillingName(): ?string
+    {
+        return $this->billingName;
+    }
+
+    public function setBillingName(?string $billingName): self
+    {
+        $this->billingName = $billingName;
+
+        return $this;
+    }
+
+    public function getBillingIco(): ?string
+    {
+        return $this->billingIco;
+    }
+
+    public function setBillingIco(?string $billingIco): self
+    {
+        $this->billingIco = $billingIco;
+
+        return $this;
+    }
+
+    public function getBillingDic(): ?string
+    {
+        return $this->billingDic;
+    }
+
+    public function setBillingDic(?string $billingDic): self
+    {
+        $this->billingDic = $billingDic;
+
+        return $this;
+    }
+
+    public function getBillingStreet(): ?string
+    {
+        return $this->billingStreet;
+    }
+
+    public function setBillingStreet(?string $billingStreet): self
+    {
+        $this->billingStreet = $billingStreet;
+
+        return $this;
+    }
+
+    public function getBillingCity(): ?string
+    {
+        return $this->billingCity;
+    }
+
+    public function setBillingCity(?string $billingCity): self
+    {
+        $this->billingCity = $billingCity;
+
+        return $this;
+    }
+
+    public function getBillingZip(): ?string
+    {
+        return $this->billingZip;
+    }
+
+    public function setBillingZip(?string $billingZip): self
+    {
+        $this->billingZip = $billingZip;
+
+        return $this;
+    }
+
+    public function getBillingCountry(): ?string
+    {
+        return $this->billingCountry;
+    }
+
+    public function setBillingCountry(?string $billingCountry): self
+    {
+        $this->billingCountry = $billingCountry;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Subscription>
+     */
+    public function getSubscriptions(): Collection
+    {
+        return $this->subscriptions;
+    }
+
+    public function addSubscription(Subscription $subscription): static
+    {
+        if (!$this->subscriptions->contains($subscription)) {
+            $this->subscriptions->add($subscription);
+            $subscription->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSubscription(Subscription $subscription): static
+    {
+        if ($this->subscriptions->removeElement($subscription)) {
+            // set the owning side to null (unless already changed)
+            if ($subscription->getUser() === $this) {
+                $subscription->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Payment>
+     */
+    public function getPayments(): Collection
+    {
+        return $this->payments;
+    }
+
+    public function addPayment(Payment $payment): static
+    {
+        if (!$this->payments->contains($payment)) {
+            $this->payments->add($payment);
+            $payment->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removePayment(Payment $payment): static
+    {
+        if ($this->payments->removeElement($payment)) {
+            // set the owning side to null (unless already changed)
+            if ($payment->getUser() === $this) {
+                $payment->setUser(null);
+            }
+        }
 
         return $this;
     }

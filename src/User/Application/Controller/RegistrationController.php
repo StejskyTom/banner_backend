@@ -32,6 +32,17 @@ class RegistrationController extends AbstractController
 
         $entityManager->beginTransaction();
         $user = $this->handle($createUser);
+
+        // Create 14-day Free Trial
+        $subscription = new \App\Entity\Subscription();
+        $subscription->setUser($user);
+        $subscription->setPlan('trial');
+        $subscription->setStatus('active');
+        $subscription->setStartDate(new \DateTime());
+        $subscription->setEndDate((new \DateTime())->modify('+14 days'));
+        
+        $entityManager->persist($subscription);
+
         $this->handle(new UpdatePassword($user, $registerRequest->password));
 
         $entityManager->flush();

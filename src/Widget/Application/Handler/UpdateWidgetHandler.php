@@ -30,10 +30,12 @@ readonly class UpdateWidgetHandler
                 $action->title,
                 $action->attachmentsOrder,
                 $action->attachmentsLinks,
+                $action->attachmentsAlts,
                 $action->imageSize,
                 $action->speed,
                 $action->pauseOnHover,
-                $action->gap
+                $action->gap,
+                $action->settings
             );
 
             $this->logger->info('Widget byl úspěšně uložen', [

@@ -22,7 +22,7 @@ class WidgetService
     /**
      * @throws WidgetNotFound
      */
-    public function updateWidget(string $id, ?string $title = null, array $attachmentsOrder = [], ?array $attachmentsLinks = null, ?int $imageSize = null, ?int $speed = null, ?bool $pauseOnHover = null, ?int $gap = null): Widget
+    public function updateWidget(string $id, ?string $title = null, array $attachmentsOrder = [], ?array $attachmentsLinks = null, ?array $attachmentsAlts = null, ?int $imageSize = null, ?int $speed = null, ?bool $pauseOnHover = null, ?int $gap = null, ?array $settings = null): Widget
     {
         $widget = $this->widgetRepository->findOneBy(['id' => $id]);
 
@@ -37,6 +37,7 @@ class WidgetService
             $widget->setPauseOnHover($pauseOnHover);
         }
         $widget->setGap($gap);
+        $widget->setSettings($settings);
 
         foreach ($attachmentsOrder as $pos => $attId) {
             $att = $this->attachmentRepository->find($attId);
@@ -46,6 +47,11 @@ class WidgetService
                 // Update link if provided
                 if ($attachmentsLinks && isset($attachmentsLinks[$attId])) {
                     $att->setLink($attachmentsLinks[$attId]);
+                }
+                
+                // Update alt if provided
+                if ($attachmentsAlts && isset($attachmentsAlts[$attId])) {
+                    $att->setAlt($attachmentsAlts[$attId]);
                 }
             }
         }

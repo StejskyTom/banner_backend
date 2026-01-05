@@ -13,10 +13,12 @@ final readonly class UpdateWidgetAction
         public string $title,
         public array $attachmentsOrder,
         public ?array $attachmentsLinks = null,
+        public ?array $attachmentsAlts = null,
         public ?int $imageSize = null,
         public ?int $speed = null,
         public ?bool $pauseOnHover = null,
         public ?int $gap = null,
+        public ?array $settings = null,
     ) {
     }
 }

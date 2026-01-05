@@ -76,6 +76,16 @@ class GoogleAuthController extends AbstractController
                     );
 
                     $this->entityManager->persist($user);
+
+                    // Create 14-day Free Trial
+                    $subscription = new \App\Entity\Subscription();
+                    $subscription->setUser($user);
+                    $subscription->setPlan('trial');
+                    $subscription->setStatus('active');
+                    $subscription->setStartDate(new \DateTime());
+                    $subscription->setEndDate((new \DateTime())->modify('+14 days'));
+                    
+                    $this->entityManager->persist($subscription);
                 }
 
                 $this->entityManager->flush();

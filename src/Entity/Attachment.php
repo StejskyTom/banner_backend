@@ -37,6 +37,10 @@ class Attachment
     #[Groups(['widget:read'])]
     private ?string $link = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['widget:read'])]
+    private ?string $alt = null;
+
     public function __construct(
         Widget $widget,
         string $url = '',
@@ -99,5 +103,15 @@ class Attachment
     public function setLink(?string $link): void
     {
         $this->link = $link;
+    }
+
+    public function getAlt(): ?string
+    {
+        return $this->alt;
+    }
+
+    public function setAlt(?string $alt): void
+    {
+        $this->alt = $alt;
     }
 }

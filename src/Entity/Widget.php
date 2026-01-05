@@ -158,6 +158,20 @@ class Widget
         $this->gap = $gap;
     }
 
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    #[Groups(['widget:read'])]
+    private ?array $settings = null;
+
+    public function getSettings(): ?array
+    {
+        return $this->settings;
+    }
+
+    public function setSettings(?array $settings): void
+    {
+        $this->settings = $settings;
+    }
+
     #[ORM\PrePersist]
     #[ORM\PreUpdate]
     public function updateTimestamp(): void
