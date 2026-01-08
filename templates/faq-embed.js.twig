@@ -60,6 +60,17 @@
     `;
     document.head.appendChild(style);
 
+    // Create Title (H2)
+    {% if widget.name %}
+    const title = document.createElement('h2');
+    title.textContent = '{{ widget.name|e("js") }}';
+    title.style.fontSize = '1.5rem';
+    title.style.fontWeight = 'bold';
+    title.style.marginBottom = '24px';
+    title.style.color = '{{ widget.questionColor|default("#111827") }}';
+    container.appendChild(title);
+    {% endif %}
+
     // Render questions
     questions.forEach((q) => {
         const item = document.createElement('div');
@@ -69,13 +80,13 @@
         
         const summary = document.createElement('summary');
         summary.innerHTML = `
-            <span>${q.question}</span>
+            <h3 style="margin:0; font-size:inherit; font-weight:inherit;">${q.question}</h3>
             <svg class="bnnr_faq_icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 9l6 6 6-6" />
             </svg>
         `;
 
-        const answer = document.createElement('div');
+        const answer = document.createElement('p');
         answer.className = 'bnnr_faq_answer';
         answer.innerHTML = q.answer;
 
