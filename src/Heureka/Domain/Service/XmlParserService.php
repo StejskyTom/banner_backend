@@ -5,6 +5,9 @@ namespace App\Heureka\Domain\Service;
 use App\Entity\Category;
 use App\Entity\HeurekaFeed;
 use App\Entity\Product;
+use App\Heureka\Domain\DTO;
+use App\Heureka\Domain\Service\Parser\FeedParserInterface;
+use App\Heureka\Domain\Service\Parser;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -12,15 +15,26 @@ use Psr\Log\LoggerInterface;
 
 class XmlParserService
 {
+    /**
+     * @var FeedParserInterface[]
+     */
+    private array $parsers;
+
     public function __construct(
         private CategoryRepository $categoryRepository,
         private ProductRepository $productRepository,
         private EntityManagerInterface $entityManager,
         private LoggerInterface $logger
-    ) {}
+    ) {
+        // Register available parsers
+        $this->parsers = [
+            new Parser\HeurekaParser(),
+            new Parser\GoogleParser(),
+        ];
+    }
 
     /**
-     * Parsuje Heureka XML feed a vytvoří/aktualizuje produkty
+     * Parsuje Heureka/Google XML feed a vytvoří/aktualizuje produkty
      */
     public function parseFeedAndSync(HeurekaFeed $feed): array
     {
@@ -36,23 +50,36 @@ class XmlParserService
             $xmlContent = $this->fetchXmlContent($feed->getUrl());
 
             // Parsovat XML
-            $xml = new \SimpleXMLElement($xmlContent);
+            try {
+                 $xml = new \SimpleXMLElement($xmlContent);
+            } catch (\Exception $e) {
+                // Try to handle namespace issues or malformed XML if acceptable,
+                // but for now just rethrow
+                throw $e;
+            }
 
-            // Iterovat přes SHOPITEM elementy
-            foreach ($xml->SHOPITEM as $shopItem) {
+            // Detect parser
+            $parser = $this->detectParser($xml);
+            $this->logger->info("Detected parser: " . get_class($parser));
+
+            // Iterovat přes produkty z parseru
+            foreach ($parser->parse($xml) as $productData) {
                 try {
-                    $this->processShopItem($feed, $shopItem, $stats);
+                    $this->processProductData($feed, $productData, $stats);
                     $counter++;
 
                     // Flush každých X produktů
                     if ($counter % $batchSize === 0) {
                         $this->entityManager->flush();
+                        $this->entityManager->clear(); // Detach objects to free memory
+                        // Re-fetch feed to keep it managed
+                        $feed = $this->entityManager->find(HeurekaFeed::class, $feed->getId()); 
                         $this->logger->info("Zpracováno {$counter} produktů, pamět: " . memory_get_usage(true) / 1024 / 1024 . " MB");
                     }
                 } catch (\Exception $e) {
                     $stats['errors']++;
                     $this->logger->error('Chyba při zpracování produktu', [
-                        'item_id' => (string) ($shopItem->ITEM_ID ?? 'unknown'),
+                        'item_id' => $productData->itemId ?? 'unknown',
                         'error' => $e->getMessage(),
                     ]);
 
@@ -64,8 +91,11 @@ class XmlParserService
             // Finální flush pro zbývající produkty
             $this->entityManager->flush();
 
-            // Refresh feed entity to get accurate count
-            $this->entityManager->refresh($feed);
+            // Refresh feed entity/stats
+            // Note: After clear(), $feed might be detached, so we fetch it fresh if needed or rely on the id. 
+            // Since we re-fetched in the loop, we should be careful. 
+            // Safest is to fetch fresh feed instance for final updates.
+            $feed = $this->entityManager->find(HeurekaFeed::class, $feed->getId());
 
             // Aktualizovat počet produktů a čas synchronizace
             $productCount = $this->productRepository->countByFeed($feed);
@@ -89,12 +119,23 @@ class XmlParserService
         return $stats;
     }
 
+    private function detectParser(\SimpleXMLElement $xml): FeedParserInterface
+    {
+        foreach ($this->parsers as $parser) {
+            if ($parser->supports($xml)) {
+                return $parser;
+            }
+        }
+
+        throw new \RuntimeException('Nepodporovaný formát feedu. Nebyl nalezen vhodný parser.');
+    }
+
     private function fetchXmlContent(string $url): string
     {
         $context = stream_context_create([
             'http' => [
                 'timeout' => 30,
-                'user_agent' => 'Mozilla/5.0 (compatible; HeurekaFeedParser/1.0)'
+                'user_agent' => 'Mozilla/5.0 (compatible; FeedParser/1.0)'
             ]
         ]);
 
@@ -107,79 +148,77 @@ class XmlParserService
         return $content;
     }
 
-    private function processShopItem(HeurekaFeed $feed, \SimpleXMLElement $shopItem, array &$stats): void
+    private function processProductData(HeurekaFeed $feed, DTO\ProductDataDTO $data, array &$stats): void
     {
-        $itemId = (string) $shopItem->ITEM_ID;
-
         // Zkontrolovat, zda produkt již existuje
-        $product = $this->productRepository->findByFeedAndItemId($feed, $itemId);
+        $product = $this->productRepository->findByFeedAndItemId($feed, $data->itemId);
 
         if ($product) {
             // Update existujícího produktu
-            $this->updateProduct($product, $shopItem);
+            $this->updateProduct($product, $data);
             $stats['updated']++;
         } else {
             // Vytvoření nového produktu
-            $product = $this->createProduct($feed, $shopItem);
+            $product = $this->createProduct($feed, $data);
             $this->entityManager->persist($product);
             $stats['created']++;
         }
     }
 
-    private function createProduct(HeurekaFeed $feed, \SimpleXMLElement $shopItem): Product
+    private function createProduct(HeurekaFeed $feed, DTO\ProductDataDTO $data): Product
     {
         $product = new Product(
             $feed,
-            (string) $shopItem->ITEM_ID,
-            (string) $shopItem->PRODUCTNAME,
-            $this->normalizePrice((string) $shopItem->PRICE_VAT),
-            (string) $shopItem->URL
+            $data->itemId,
+            $data->productName,
+            $this->normalizePrice($data->priceVat),
+            $data->url
         );
 
-        $this->populateProductFields($product, $shopItem);
+        $this->populateProductFields($product, $data);
 
         return $product;
     }
 
-    private function updateProduct(Product $product, \SimpleXMLElement $shopItem): void
+    private function updateProduct(Product $product, DTO\ProductDataDTO $data): void
     {
-        $product->setProductName((string) $shopItem->PRODUCTNAME);
-        $product->setPriceVat($this->normalizePrice((string) $shopItem->PRICE_VAT));
-        $product->setUrl((string) $shopItem->URL);
+        $product->setProductName($data->productName);
+        $product->setPriceVat($this->normalizePrice($data->priceVat));
+        $product->setUrl($data->url);
 
-        $this->populateProductFields($product, $shopItem);
+        $this->populateProductFields($product, $data);
     }
 
-    private function populateProductFields(Product $product, \SimpleXMLElement $shopItem): void
+    private function populateProductFields(Product $product, DTO\ProductDataDTO $data): void
     {
         // Základní pole
-        if (isset($shopItem->DESCRIPTION)) {
-            $product->setDescription((string) $shopItem->DESCRIPTION);
+        if ($data->description) {
+            $product->setDescription($data->description);
         }
 
-        if (isset($shopItem->IMGURL)) {
-            $product->setImgUrl((string) $shopItem->IMGURL);
+        if ($data->imgUrl) {
+            $product->setImgUrl($data->imgUrl);
         }
 
-        if (isset($shopItem->IMGURL_ALTERNATIVE)) {
-            $product->setImgUrlAlternative((string) $shopItem->IMGURL_ALTERNATIVE);
+        if ($data->imgUrlAlternative) {
+            $product->setImgUrlAlternative($data->imgUrlAlternative);
         }
 
-        if (isset($shopItem->MANUFACTURER)) {
-            $product->setManufacturer((string) $shopItem->MANUFACTURER);
+        if ($data->manufacturer) {
+            $product->setManufacturer($data->manufacturer);
         }
 
-        if (isset($shopItem->EAN)) {
-            $product->setEan((string) $shopItem->EAN);
+        if ($data->ean) {
+            $product->setEan($data->ean);
         }
 
-        if (isset($shopItem->PRODUCTNO)) {
-            $product->setProductNo((string) $shopItem->PRODUCTNO);
+        if ($data->productNo) {
+            $product->setProductNo($data->productNo);
         }
 
         // Zpracování kategorie
-        if (isset($shopItem->CATEGORYTEXT)) {
-            $category = $this->processCategoryText((string) $shopItem->CATEGORYTEXT);
+        if ($data->categoryText) {
+            $category = $this->processCategoryText($data->categoryText);
             $product->setCategory($category);
         }
     }

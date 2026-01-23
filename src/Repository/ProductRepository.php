@@ -45,6 +45,10 @@ class ProductRepository extends ServiceEntityRepository
         if ($search) {
             $qb->andWhere('p.productName LIKE :search OR p.description LIKE :search')
                ->setParameter('search', '%' . $search . '%');
+
+            // Prioritize matches in productName
+            $qb->addSelect('CASE WHEN p.productName LIKE :search THEN 0 ELSE 1 END AS HIDDEN relevance')
+               ->orderBy('relevance', 'ASC');
         }
 
         if ($categoryName) {
@@ -54,17 +58,17 @@ class ProductRepository extends ServiceEntityRepository
 
         switch ($sort) {
             case 'name_desc':
-                $qb->orderBy('p.productName', 'DESC');
+                $qb->addOrderBy('p.productName', 'DESC');
                 break;
             case 'price_asc':
-                $qb->orderBy('p.priceVat', 'ASC');
+                $qb->addOrderBy('p.priceVat', 'ASC');
                 break;
             case 'price_desc':
-                $qb->orderBy('p.priceVat', 'DESC');
+                $qb->addOrderBy('p.priceVat', 'DESC');
                 break;
             case 'name_asc':
             default:
-                $qb->orderBy('p.productName', 'ASC');
+                $qb->addOrderBy('p.productName', 'ASC');
                 break;
         }
 
