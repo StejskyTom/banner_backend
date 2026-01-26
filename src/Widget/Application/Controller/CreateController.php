@@ -115,9 +115,43 @@ class CreateController extends AbstractController
                 ]
             );
 
+            $settings = $widget->getSettings() ?? [];
+            // Construct Title HTML from settings
+            $titleTag = $settings['titleTag'] ?? 'h2';
+            $titleText = $settings['titleText'] ?? $widget->getTitle() ?? '';
+            $titleStyle = [];
+            if (!empty($settings['titleColor'])) $titleStyle[] = "color: {$settings['titleColor']}";
+            if (!empty($settings['titleFont'])) $titleStyle[] = "font-family: {$settings['titleFont']}";
+            if (!empty($settings['titleSize'])) $titleStyle[] = "font-size: {$settings['titleSize']}";
+            if (!empty($settings['titleAlign'])) $titleStyle[] = "text-align: {$settings['titleAlign']}";
+            if (!empty($settings['titleBold']) && $settings['titleBold']) $titleStyle[] = "font-weight: bold";
+            if (!empty($settings['titleItalic']) && $settings['titleItalic']) $titleStyle[] = "font-style: italic";
+            $titleStyle[] = "margin: 0 0 12px"; 
+            
+            $titleStyleStr = implode(';', $titleStyle);
+            $titleHtml = "<{$titleTag} style='{$titleStyleStr}'>{$titleText}</{$titleTag}>";
+
+            // Construct Subtitle HTML from settings
+            $subtitleTag = $settings['subtitleTag'] ?? 'p';
+            $subtitleText = $settings['subtitleText'] ?? '';
+            
+            if (!empty($subtitleText)) {
+                $subStyle = [];
+                if (!empty($settings['subtitleColor'])) $subStyle[] = "color: {$settings['subtitleColor']}";
+                if (!empty($settings['subtitleFont'])) $subStyle[] = "font-family: {$settings['subtitleFont']}";
+                if (!empty($settings['subtitleSize'])) $subStyle[] = "font-size: {$settings['subtitleSize']}";
+                if (!empty($settings['subtitleAlign'])) $subStyle[] = "text-align: {$settings['subtitleAlign']}";
+                if (!empty($settings['subtitleBold']) && $settings['subtitleBold']) $subStyle[] = "font-weight: bold";
+                if (!empty($settings['subtitleItalic']) && $settings['subtitleItalic']) $subStyle[] = "font-style: italic";
+                $subStyle[] = "margin: 0 0 24px";
+                
+                $subStyleStr = implode(';', $subStyle);
+                $titleHtml .= "<{$subtitleTag} style='{$subStyleStr}'>{$subtitleText}</{$subtitleTag}>";
+            }
+
             return $this->renderView('embed.js.twig', [
                 'widgetId' => $widget->getId(),
-                'title' => $widget->getTitle(),
+                'title' => $titleHtml,
                 'attachments' => $attachmentsJson,
                 'speed' => $widget->getSpeed(),
                 'imageSize' => $widget->getImageSize(),
@@ -139,9 +173,7 @@ class CreateController extends AbstractController
     public function uploadAttachment(
         #[MapEntity] Widget $widget,
         Request $request,
-        EntityManagerInterface $em,
-        #[Autowire('%server_domain%')]
-        string $server_domain = ''
+        EntityManagerInterface $em
     ): JsonResponse {
         if ($widget->getUser() !== $this->getUser()) {
             return $this->json(['error' => 'Widget nenalezen'], 404);
@@ -178,11 +210,16 @@ class CreateController extends AbstractController
                     return $this->json(['error' => 'Soubor je příliš velký (max 5MB)'], 400);
                 }
 
-                $publicDir = $this->getParameter('app.public_dir');
-                
-                // Auto-detection for shared hosting (Endora)
-                if ($publicDir === 'public' && is_dir($this->getParameter('kernel.project_dir') . '/public_html')) {
-                    $publicDir = 'public_html';
+                $publicDir = 'public';
+                if ($this->getParameter('kernel.project_dir') && is_dir($this->getParameter('kernel.project_dir') . '/public_html')) {
+                     // Fallback for Endora hosting if needed, but prioritize specific config if exists
+                     // For local dev, standard public is best.
+                     // Checks if .env has APP_PUBLIC_DIR
+                     try {
+                        $publicDir = $this->getParameter('app.public_dir');
+                     } catch(\Exception $e) {
+                        $publicDir = 'public';
+                     }
                 }
 
                 $dir = $this->getParameter('kernel.project_dir') . '/' . $publicDir . '/uploads/logos';
@@ -195,7 +232,8 @@ class CreateController extends AbstractController
                 $file->move($dir, $filename);
 
                 $publicPath = '/uploads/logos/' . $filename;
-                $publicUrl = $server_domain . $publicPath;
+                // Use the request host to form the URL, ensuring it matches the server handling the request
+                $publicUrl = $request->getSchemeAndHttpHost() . $publicPath;
                 $isExternal = false;
 
             } elseif ($externalUrl) {
@@ -212,8 +250,6 @@ class CreateController extends AbstractController
                     return $this->json(['error' => 'URL musí začínat http:// nebo https://'], 400);
                 }
 
-                // Volitelně: ověření, že URL odkazuje na obrázek
-                // (můžete použít get_headers nebo curl pro kontrolu Content-Type)
                 $headers = @get_headers($externalUrl, 1);
                 if ($headers && isset($headers['Content-Type'])) {
                     $contentType = is_array($headers['Content-Type'])

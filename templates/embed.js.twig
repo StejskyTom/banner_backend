@@ -3,7 +3,7 @@
 
     const logos = {{ attachments|raw }};
     const widgetId = '{{ widgetId }}';
-    const widgetTitle = "{{ title }}";
+    const widgetTitle = {{ title|json_encode|raw }};
 
     // Použij hodnoty z entity nebo default
     const imgHeight = '{{ imageSize ?: 64 }}px';
@@ -141,7 +141,7 @@
         widgetContainer.style.setProperty('--speed', duration + 's');
 
         widgetContainer.innerHTML = `
-            <h2>${widgetTitle}</h2>
+            ${widgetTitle}
             <div class="bnnr_logo_carousel">
                 <ul class="bnnr_logo_strip">
                     ${trackHTML}
