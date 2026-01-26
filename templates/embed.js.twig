@@ -4,15 +4,82 @@
     const logos = {{ attachments|raw }};
     const widgetId = '{{ widgetId }}';
     const widgetTitle = {{ title|json_encode|raw }};
+    const settings = {{ settings|json_encode|raw }} || {};
 
-    // Použij hodnoty z entity nebo default
+    const enableAnimation = settings.enableAnimation !== false;
     const imgHeight = '{{ imageSize ?: 64 }}px';
     const imgMaxWidth = '120px';
     const itemGap = '{{ gap ?: 32 }}px';
-    const maskLeft = '128px';
-    const maskRight = '200px';
-    const bg = '#ffffff';
-    const fg = '#171717';
+    
+    // Fade Settings
+    const fadeEnabled = (settings.fadeEnabled !== false) && enableAnimation; // Disable fade if static
+    const fadeWidthVal = (settings.fadeWidth ?? 128);
+    const fadeWidthUnit = settings.fadeWidthUnit || 'px';
+    const fadeWidth = fadeWidthVal + fadeWidthUnit;
+    const fadeMode = settings.fadeMode || 'mask';
+    const fadeColor = settings.fadeColor || '#ffffff';
+    // Logic invert: 0% Transp = Solid (1.0), 100% Transp = Invisible (0.0)
+    // Actually user wanted: 0 slider = Solid. 100 slider = Invisible.
+    // Slider value is fadeOpacity aka Transparency.
+    const sliderVal = settings.fadeOpacity ?? 0;
+    const fadeTransparency = sliderVal / 100; 
+
+    // Image Settings
+    const imgRadius = (settings.imgRadius || 0) + 'px';
+    
+    function hexToRgba(hex, alpha) {
+        let r = 0, g = 0, b = 0;
+        if (hex) {
+            if (hex.length === 4) {
+                r = parseInt(hex[1] + hex[1], 16);
+                g = parseInt(hex[2] + hex[2], 16);
+                b = parseInt(hex[3] + hex[3], 16);
+            } else if (hex.length === 7) {
+                r = parseInt(hex.substring(1, 3), 16);
+                g = parseInt(hex.substring(3, 5), 16);
+                b = parseInt(hex.substring(5, 7), 16);
+            }
+        }
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    let shadowStyle = 'none';
+    if (settings.shadowEnabled) {
+        const sColor = settings.shadowColor || '#000000';
+        const sBlur = settings.shadowBlur || 10;
+        const sOp = (settings.shadowOpacity || 20) / 100;
+        shadowStyle = `0 4px ${sBlur}px ${hexToRgba(sColor, sOp)}`;
+    }
+
+    // Mask CSS construction
+    let containerExtraCSS = '';
+    let overlayHTML = '';
+    
+    if (fadeEnabled) {
+        if (fadeMode === 'mask') {
+            const edgeAlpha = fadeTransparency;
+            const gradLeft = `linear-gradient(to right, rgba(0,0,0,${edgeAlpha}) 0, #000 ${fadeWidth}, #000 100%)`;
+            const gradRight = `linear-gradient(to left, rgba(0,0,0,${edgeAlpha}) 0, #000 ${fadeWidth}, #000 100%)`;
+            const maskVal = `${gradLeft}, ${gradRight}`;
+            
+            containerExtraCSS += `
+                mask-image: ${maskVal};
+                -webkit-mask-image: ${maskVal};
+                mask-composite: intersect;
+                -webkit-mask-composite: source-in;
+            `;
+        } else if (fadeMode === 'color') {
+            // Overlay approach
+            const overlayOp = 1 - fadeTransparency;
+            const gradLeft = `linear-gradient(to right, ${fadeColor}, transparent)`;
+            const gradRight = `linear-gradient(to left, ${fadeColor}, transparent)`;
+            
+            overlayHTML = `
+                <div style="position:absolute; top:0; bottom:0; left:0; width:${fadeWidth}; background:${gradLeft}; opacity:${overlayOp}; z-index:10; pointer-events:none;"></div>
+                <div style="position:absolute; top:0; bottom:0; right:0; width:${fadeWidth}; background:${gradRight}; opacity:${overlayOp}; z-index:10; pointer-events:none;"></div>
+            `;
+        }
+    }
 
     const currentScript = document.currentScript ||
         (function() {
@@ -27,13 +94,11 @@
 
     const styles = `
         :root {
-            --bg: ${bg};
-            --fg: ${fg};
+            --bg: #ffffff;
+            --fg: #171717;
             --item-gap: ${itemGap};
             --img-h: ${imgHeight};
             --img-max-w: ${imgMaxWidth};
-            --mask-left: ${maskLeft};
-            --mask-right: ${maskRight};
         }
         @media (prefers-color-scheme: dark){
             :root { --bg:#0a0a0a; --fg:#ededed; }
@@ -49,39 +114,51 @@
             margin: 0 auto;
             overflow:hidden;
             position: relative;
-            mask-image: linear-gradient(to right, transparent 0, #000 var(--mask-left), #000 calc(100% - var(--mask-right)), transparent 100%);
-            -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--mask-left), #000 calc(100% - var(--mask-right)), transparent 100%);
+            ${containerExtraCSS}
         }
+        
+        /* Strip Layout */
         .bnnr_logo_strip{
             display:flex;
             align-items:center;
             list-style:none;
-            padding:0;
+            padding: 16px 0;
             margin:0;
             gap: var(--item-gap);
-            width:max-content;
-            animation: scroll var(--speed) linear infinite;
-            padding-right: var(--item-gap);
+            ${enableAnimation ? 
+              `width: max-content; 
+               padding-right: var(--item-gap); 
+               animation: scroll var(--speed) linear infinite;` 
+            : 
+              `width: 100%; 
+               flex-wrap: wrap; 
+               justify-content: center;`
+            }
         }
-        .bnnr_logo_strip img{
+        
+        .bnnr_logo_strip img {
             height:var(--img-h);
             max-width:var(--img-max-w);
             object-fit:contain;
             display:block;
             opacity:.85;
             transition: opacity .2s ease;
+            
+            /* User Styles */
+            border-radius: ${imgRadius};
+            box-shadow: ${shadowStyle};
         }
-        .bnnr_logo_strip a{
-            text-decoration: none;
-            display: inline-block;
-        }
+        
+        .bnnr_logo_strip a{ text-decoration: none; display: inline-block; }
         .bnnr_logo_strip img:hover{ opacity:1; cursor: pointer; }
         .bnnr_logo_strip a:hover img{ opacity:1; }
+        
         {% if pauseOnHover %}
         .bnnr_logo_carousel:hover .bnnr_logo_strip {
             animation-play-state: paused;
         }
         {% endif %}
+        
         @keyframes scroll{
             from { transform: translateX(0); }
             to   { transform: translateX(-50%); }
@@ -89,12 +166,7 @@
         @media (max-width:768px){
             :root{ --img-h: 48px; --item-gap: 24px; --speed: 20s; }
         }
-        h2{
-            text-align:center;
-            font-size: clamp(1.125rem, 2vw, 1.5rem);
-            margin: 0 0 12px;
-            font-weight: 700;
-        }
+        h2, p { margin:0; } /* Reset defaults, inline styles from controller win */
     `;
 
     if (!document.getElementById('widget-styles-' + widgetId)) {
@@ -112,37 +184,59 @@
 
         const containerWidth = window.innerWidth;
         const estimatedLogoWidth = parseInt(imgMaxWidth) + parseInt(itemGap);
-        const logosPerScreen = Math.ceil(containerWidth / estimatedLogoWidth);
-        const totalLogosNeeded = Math.max(logosPerScreen * 3, logos.length * 2);
-
-        let duplicatedLogos = [];
-        const repetitions = Math.ceil(totalLogosNeeded / logos.length);
-
-        for (let i = 0; i < repetitions; i++) {
-            duplicatedLogos.push(...logos);
+        // If Animation Logic
+        let renderLogos = [];
+        
+        if (enableAnimation) {
+             const logosPerScreen = Math.ceil(containerWidth / estimatedLogoWidth);
+             const totalLogosNeeded = Math.max(logosPerScreen * 3, logos.length * 2);
+             const repetitions = Math.ceil(totalLogosNeeded / logos.length);
+             
+             let duplicated = [];
+             for (let i = 0; i < repetitions; i++) duplicated.push(...logos);
+             // Ensure even count for perfect half-scroll loop? 
+             // Logic: Scroll moves -50%. We need list to be 2 identical halves.
+             // Actually simplest is just Append Logos to itself once (or enough to cover screen) then duplicate THAT block?
+             // Standard infinite scroll: Double the content. Animate to -50%.
+             // If content < screen width, need more copies.
+             
+             // Simple Robust Logic: Ensure content is at least 2x screen width. Then duplicate IT.
+             // But my CSS `translateX(-50%)` expects the list to be distinct halves A+A.
+             // So I just need `A` to be wide enough to cover screen.
+             
+             // Step 1: Make A large enough
+             let baseList = [...logos];
+             while (baseList.length * 150 < containerWidth + 500) { // Approx width check
+                 baseList = [...baseList, ...logos];
+             }
+             
+             // Step 2: Render A + A
+             renderLogos = [...baseList, ...baseList];
+             
+             // Duration
+             const itemsScrolled = renderLogos.length / 2;
+             const baseSpeed = {{ speed ?: 20 }};
+             // Normalized speed: user sets "20s" for typical width?
+             // Frontend logic: duration = (items * speed) / 10.
+             const duration = (renderLogos.length * baseSpeed) / 10;
+             widgetContainer.style.setProperty('--speed', duration + 's');
+             
+        } else {
+             renderLogos = logos; // Static Grid
         }
-        if (repetitions % 2 !== 0) duplicatedLogos.push(...logos);
 
-        const trackHTML = duplicatedLogos.map(logo => {
+        const trackHTML = renderLogos.map(logo => {
             const imgTag = `<img src="${logo.url}" alt="${logo.alt || ''}" class="bnnr_logo_item" loading="lazy">`;
-
             if (logo.link) {
                 return `<a href="${logo.link}" target="_blank" rel="noopener noreferrer" style="display: inline-block;">${imgTag}</a>`;
             }
             return imgTag;
         }).join('');
 
-        // Calculate duration: (items scrolled * baseSpeed) / 10
-        // We scroll half of the total items
-        const itemsScrolled = duplicatedLogos.length / 2;
-        const baseSpeed = {{ speed ?: 20 }};
-        const duration = (itemsScrolled * baseSpeed) / 10;
-
-        widgetContainer.style.setProperty('--speed', duration + 's');
-
         widgetContainer.innerHTML = `
             ${widgetTitle}
             <div class="bnnr_logo_carousel">
+                ${overlayHTML}
                 <ul class="bnnr_logo_strip">
                     ${trackHTML}
                 </ul>

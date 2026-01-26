@@ -118,7 +118,7 @@ class CreateController extends AbstractController
             $settings = $widget->getSettings() ?? [];
             // Construct Title HTML from settings
             $titleTag = $settings['titleTag'] ?? 'h2';
-            $titleText = $settings['titleText'] ?? $widget->getTitle() ?? '';
+            $titleText = $widget->getTitle() ?? $settings['titleText'] ?? '';
             $titleStyle = [];
             if (!empty($settings['titleColor'])) $titleStyle[] = "color: {$settings['titleColor']}";
             if (!empty($settings['titleFont'])) $titleStyle[] = "font-family: {$settings['titleFont']}";
@@ -126,7 +126,8 @@ class CreateController extends AbstractController
             if (!empty($settings['titleAlign'])) $titleStyle[] = "text-align: {$settings['titleAlign']}";
             if (!empty($settings['titleBold']) && $settings['titleBold']) $titleStyle[] = "font-weight: bold";
             if (!empty($settings['titleItalic']) && $settings['titleItalic']) $titleStyle[] = "font-style: italic";
-            $titleStyle[] = "margin: 0 0 12px"; 
+            $marginBottom = $settings['titleMarginBottom'] ?? 12;
+            $titleStyle[] = "margin: 0 0 {$marginBottom}px"; 
             
             $titleStyleStr = implode(';', $titleStyle);
             $titleHtml = "<{$titleTag} style='{$titleStyleStr}'>{$titleText}</{$titleTag}>";
@@ -143,7 +144,8 @@ class CreateController extends AbstractController
                 if (!empty($settings['subtitleAlign'])) $subStyle[] = "text-align: {$settings['subtitleAlign']}";
                 if (!empty($settings['subtitleBold']) && $settings['subtitleBold']) $subStyle[] = "font-weight: bold";
                 if (!empty($settings['subtitleItalic']) && $settings['subtitleItalic']) $subStyle[] = "font-style: italic";
-                $subStyle[] = "margin: 0 0 24px";
+                $subMargin = $settings['subtitleMarginBottom'] ?? 24;
+                $subStyle[] = "margin: 0 0 {$subMargin}px";
                 
                 $subStyleStr = implode(';', $subStyle);
                 $titleHtml .= "<{$subtitleTag} style='{$subStyleStr}'>{$subtitleText}</{$subtitleTag}>";
@@ -157,6 +159,7 @@ class CreateController extends AbstractController
                 'imageSize' => $widget->getImageSize(),
                 'pauseOnHover' => $widget->getPauseOnHover(),
                 'gap' => $widget->getGap(),
+                'settings' => $settings,
             ]);
         });
 
