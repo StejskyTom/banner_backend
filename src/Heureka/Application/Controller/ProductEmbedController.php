@@ -49,7 +49,7 @@ class ProductEmbedController extends AbstractController
             return $response;
         }
 
-        $content = $cache->get('heureka_product_embed_' . $feedId, function (ItemInterface $item) use ($feedId, $feed, $productRepository, $serializer) {
+        $content = $cache->get('heureka_product_embed_' . $feedId . '_' . $etag, function (ItemInterface $item) use ($feedId, $feed, $productRepository, $serializer) {
             $item->expiresAfter(3600 * 24); // Server cache for 24 hours
 
             $products = $productRepository->findSelectedByFeed($feed);

@@ -18,6 +18,73 @@
     widgetContainer.className = 'bnnr_prod_widget bnnr_layout_' + layout;
     currentScript.parentNode.insertBefore(widgetContainer, currentScript);
 
+    const hexToRgba = (hex, alpha) => {
+        if (!hex) return 'rgba(0,0,0,' + alpha + ')';
+        hex = hex.replace('#', '');
+        if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    };
+
+    const formatPrice = (price, format) => {
+        if (!price) return '';
+        let numPrice = parseFloat(price.toString().replace(/\s/g, '').replace(',', '.'));
+        if (isNaN(numPrice)) return price;
+
+        if (format === 'no_decimals') {
+            return Math.round(numPrice).toLocaleString('cs-CZ').replace(/\s/g, '&nbsp;');
+        }
+
+        const formatted = numPrice.toLocaleString('cs-CZ', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        if (format === 'dot') {
+            return formatted.replace(',', '.').replace(/\s/g, '&nbsp;');
+        }
+        
+        return formatted.replace(/\s/g, '&nbsp;');
+    };
+
+    // Shadow Logic
+    const shadowEnabled = options.cardShadowEnabled !== false; // Default true
+    const shadowColor = options.cardShadowColor || '#000000';
+    const shadowBlur = options.cardShadowBlur !== undefined ? options.cardShadowBlur : 10;
+    const shadowOpacity = options.cardShadowOpacity !== undefined ? options.cardShadowOpacity : 10; // 0-100 (reversed logic in UI handled in frontend)
+    // Frontend saves "inverted" logic? No, in frontend "0% transparency = 100% opacity". 
+    // "100% transparency = 0% opacity".
+    // In UI: "Průhlednost stínu (X%)". Value passed to backend is `cardShadowOpacity`.
+    // Wait, in frontend I did `value={100 - cardShadowOpacity}` for display/slider, but state is `cardShadowOpacity`.
+    // Default state 10. `100 - 10 = 90%` displayed? Or `10%`?
+    // Let's check frontend again...
+    // In frontend defaults: `const [cardShadowOpacity, setCardShadowOpacity] = useState(10);`
+    // UI Label: `Průhlednost stínu ({100 - cardShadowOpacity}%)`
+    // Slider Value: `100 - cardShadowOpacity`
+    // onChange: `setCardShadowOpacity(100 - val)`
+    // So if I set slider to 0 (Full Opacity), val=0, `setCardShadowOpacity(100)`. Backend gets 100.
+    // If I set slider to 100 (Invisible), val=100, `setCardShadowOpacity(0)`. Backend gets 0.
+    // So `cardShadowOpacity` IS the opacity/alpha value (0-100).
+    // So `hexToRgba(shadowColor, shadowOpacity / 100)` is correct.
+    
+    // BUT wait, looking at my frontend code in Step 319:
+    // `value={100 - cardShadowOpacity}`
+    // `onChange={(e) => setCardShadowOpacity(100 - parseInt(e.target.value))}`
+    // If I want 0% transparency (full visible), slider = 0. `setCardShadowOpacity(100 - 0) = 100`.
+    // If I want 100% transparency (invisible), slider = 100. `setCardShadowOpacity(100 - 100) = 0`.
+    // So stored value is Opacity (0-100).
+    
+    const shadowStyle = shadowEnabled 
+        ? `0 4px ${shadowBlur}px ${hexToRgba(shadowColor, shadowOpacity / 100)}`
+        : 'none';
+        
+    const hoverShadowStyle = shadowEnabled
+        ? `0 10px ${Math.max(15, shadowBlur + 5)}px ${hexToRgba(shadowColor, Math.max(0, (shadowOpacity / 100) - 0.05))}` 
+        : 'none';
+
+
     const styles = `
         .bnnr_prod_widget {
             width: 100%;
@@ -25,20 +92,25 @@
             font-family: system-ui, -apple-system, sans-serif;
         }
 
-        .bnnr_prod_widget h2 {
-            text-align: center;
-            font-size: clamp(1.25rem, 2vw, 1.75rem);
-            margin: 0 0 32px;
-            font-weight: 800;
-            color: #111827;
+        .bnnr_prod_widget h1, 
+        .bnnr_prod_widget h2, 
+        .bnnr_prod_widget h3, 
+        .bnnr_prod_widget p.bnnr_widget_title {
+            text-align: ${options.widgetTitleAlign || 'center'};
+            font-size: ${options.widgetTitleSize || '24px'};
+            margin: 0 0 ${options.widgetTitleMarginBottom !== undefined ? options.widgetTitleMarginBottom : 32}px;
+            font-family: ${options.widgetTitleFont || 'inherit'};
+            font-weight: ${options.widgetTitleBold ? '700' : '400'};
+            font-style: ${options.widgetTitleItalic ? 'italic' : 'normal'};
+            color: ${options.widgetTitleColor || '#111827'};
             letter-spacing: -0.025em;
         }
 
         .bnnr_prod_card {
-            background: #ffffff;
-            border-radius: 16px;
+            background: ${options.cardBackgroundColor || '#ffffff'};
+            border-radius: ${options.cardBorderRadius !== undefined ? options.cardBorderRadius : 16}px;
             padding: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            box-shadow: ${shadowStyle};
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: center;
             display: flex;
@@ -50,7 +122,7 @@
 
         .bnnr_prod_card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            box-shadow: ${hoverShadowStyle};
         }
 
         .bnnr_prod_card img {
@@ -66,13 +138,15 @@
         }
 
         .bnnr_prod_title {
-            font-size: 15px;
-            font-weight: 600;
-            color: #374151;
+            font-size: ${options.productNameSize || '15px'};
+            font-weight: ${options.productNameBold ? '700' : '400'};
+            font-style: ${options.productNameItalic ? 'italic' : 'normal'};
+            font-family: ${options.productNameFont || 'inherit'};
+            color: ${options.productNameColor || '#374151'};
             margin-bottom: 12px;
-            min-height: 44px;
+            min-height: ${options.productNameFull ? 'auto' : '44px'};
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: ${options.productNameFull ? 'unset' : '2'};
             -webkit-box-orient: vertical;
             overflow: hidden;
             line-height: 1.5;
@@ -80,9 +154,11 @@
         }
 
         .bnnr_prod_price {
-            font-size: 22px;
-            font-weight: 800;
-            color: #059669;
+            font-size: ${options.priceSize || '22px'};
+            font-weight: ${options.priceBold ? '800' : '400'};
+            font-style: ${options.priceItalic ? 'italic' : 'normal'};
+            font-family: ${options.priceFont || 'inherit'};
+            color: ${options.priceColor || '#059669'};
             margin-bottom: 16px;
             letter-spacing: -0.025em;
         }
@@ -93,11 +169,13 @@
             justify-content: center;
             padding: 12px 24px;
             background: ${options.buttonColor || '#2563eb'};
-            color: white;
+            color: ${options.buttonTextColor || 'white'};
+            font-size: ${options.buttonFontSize || '14px'};
+            font-weight: ${options.buttonBold ? '600' : '400'};
+            font-style: ${options.buttonItalic ? 'italic' : 'normal'};
+            font-family: ${options.buttonFont || 'inherit'};
             text-decoration: none;
             border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
             transition: all 0.2s;
             margin-top: auto;
             width: 100%;
@@ -258,8 +336,12 @@
             `;
         }
 
+        const validTags = ['h1', 'h2', 'h3', 'p'];
+        const titleTag = validTags.includes(options.widgetTitleTag) ? options.widgetTitleTag : 'h2';
+        const titleClass = titleTag === 'p' ? ' class="bnnr_widget_title"' : '';
+
         widgetContainer.innerHTML = `
-            <h2>${feedName}</h2>
+            ${options.widgetTitle ? '<' + titleTag + titleClass + '>' + options.widgetTitle + '</' + titleTag + '>' : ''}
             ${contentHTML}
         `;
     }
@@ -268,8 +350,8 @@
         return `
             <div class="bnnr_prod_card">
                 <img src="${product.imgUrl || '/placeholder.png'}" alt="${product.productName}" loading="lazy">
-                <div class="bnnr_prod_title">${product.productName}</div>
-                <div class="bnnr_prod_price">${parseFloat(product.priceVat).toLocaleString('cs-CZ')} Kč</div>
+                <div class="bnnr_prod_title" title="${product.productName.replace(/"/g, '&quot;')}">${product.productName}</div>
+                <div class="bnnr_prod_price">${formatPrice(product.priceVat, options.priceFormat || 'comma')} Kč</div>
                 <a href="${product.url}" target="_blank" rel="noopener noreferrer" class="bnnr_buy_btn">
                     ${options.buttonText || 'Koupit'}
                 </a>
