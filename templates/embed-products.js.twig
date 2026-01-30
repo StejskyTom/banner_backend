@@ -45,7 +45,7 @@
         if (format === 'dot') {
             return formatted.replace(',', '.').replace(/\s/g, '&nbsp;');
         }
-        
+
         return formatted.replace(/\s/g, '&nbsp;');
     };
 
@@ -54,7 +54,7 @@
     const shadowColor = options.cardShadowColor || '#000000';
     const shadowBlur = options.cardShadowBlur !== undefined ? options.cardShadowBlur : 10;
     const shadowOpacity = options.cardShadowOpacity !== undefined ? options.cardShadowOpacity : 10; // 0-100 (reversed logic in UI handled in frontend)
-    // Frontend saves "inverted" logic? No, in frontend "0% transparency = 100% opacity". 
+    // Frontend saves "inverted" logic? No, in frontend "0% transparency = 100% opacity".
     // "100% transparency = 0% opacity".
     // In UI: "Průhlednost stínu (X%)". Value passed to backend is `cardShadowOpacity`.
     // Wait, in frontend I did `value={100 - cardShadowOpacity}` for display/slider, but state is `cardShadowOpacity`.
@@ -68,20 +68,20 @@
     // If I set slider to 100 (Invisible), val=100, `setCardShadowOpacity(0)`. Backend gets 0.
     // So `cardShadowOpacity` IS the opacity/alpha value (0-100).
     // So `hexToRgba(shadowColor, shadowOpacity / 100)` is correct.
-    
+
     // BUT wait, looking at my frontend code in Step 319:
     // `value={100 - cardShadowOpacity}`
     // `onChange={(e) => setCardShadowOpacity(100 - parseInt(e.target.value))}`
     // If I want 0% transparency (full visible), slider = 0. `setCardShadowOpacity(100 - 0) = 100`.
     // If I want 100% transparency (invisible), slider = 100. `setCardShadowOpacity(100 - 100) = 0`.
     // So stored value is Opacity (0-100).
-    
-    const shadowStyle = shadowEnabled 
+
+    const shadowStyle = shadowEnabled
         ? `0 4px ${shadowBlur}px ${hexToRgba(shadowColor, shadowOpacity / 100)}`
         : 'none';
-        
+
     const hoverShadowStyle = shadowEnabled
-        ? `0 10px ${Math.max(15, shadowBlur + 5)}px ${hexToRgba(shadowColor, Math.max(0, (shadowOpacity / 100) - 0.05))}` 
+        ? `0 10px ${Math.max(15, shadowBlur + 5)}px ${hexToRgba(shadowColor, Math.max(0, (shadowOpacity / 100) - 0.05))}`
         : 'none';
 
 
@@ -92,9 +92,9 @@
             font-family: system-ui, -apple-system, sans-serif;
         }
 
-        .bnnr_prod_widget h1, 
-        .bnnr_prod_widget h2, 
-        .bnnr_prod_widget h3, 
+        .bnnr_prod_widget h1,
+        .bnnr_prod_widget h2,
+        .bnnr_prod_widget h3,
         .bnnr_prod_widget p.bnnr_widget_title {
             text-align: ${options.widgetTitleAlign || 'center'};
             font-size: ${options.widgetTitleSize || '24px'};
@@ -210,7 +210,7 @@
         /* Grid Styles */
         .bnnr_layout_grid .bnnr_grid_wrapper {
             display: grid;
-            grid-template-columns: repeat(${options.gridColumns || 'auto-fill'}, minmax(220px, 1fr));
+            grid-template-columns: repeat(${options.gridColumns || 4}, 1fr);
             gap: 24px;
         }
 
