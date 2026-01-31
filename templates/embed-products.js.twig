@@ -121,7 +121,8 @@
             text-align: center !important;
             display: flex !important;
             flex-direction: column !important;
-            height: 100% !important;
+            justify-content: space-between !important;
+            height: auto !important;
             box-sizing: border-box !important;
             border: ${options.cardBorderEnabled ? (options.cardBorderWidth || 1) + 'px solid ' + (options.cardBorderColor || '#e5e7eb') : 'none'} !important;
             text-decoration: none !important;
@@ -222,24 +223,90 @@
 
         /* Carousel Styles */
         .bnnr_layout_carousel .bnnr_car_wrapper {
-            overflow: hidden !important;
+            overflow: visible !important;
             position: relative !important;
             width: 100% !important;
+            padding: 0 10px !important;
+            box-sizing: border-box !important;
         }
         .bnnr_layout_carousel .bnnr_car_track {
             display: flex !important;
             gap: 24px !important;
-            width: max-content !important;
-            animation: heureka-scroll 40s linear infinite !important;
+            overflow-x: auto !important;
+            scroll-behavior: smooth !important;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+            padding: 10px 0 20px 0 !important;
+            width: 100% !important;
+            align-items: stretch !important;
+        }
+        .bnnr_layout_carousel .bnnr_car_track::-webkit-scrollbar {
+            display: none !important;
         }
         .bnnr_layout_carousel .bnnr_prod_card {
-            min-width: 220px !important;
-            max-width: 220px !important;
+            min-width: calc((100% - (${options.gridColumns || 4} - 1) * 24px) / ${options.gridColumns || 4}) !important;
+            max-width: calc((100% - (${options.gridColumns || 4} - 1) * 24px) / ${options.gridColumns || 4}) !important;
+            flex-shrink: 0 !important;
         }
-        @keyframes heureka-scroll {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
+
+        .bnnr_car_arrow {
+            position: absolute !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            background: ${options.carouselArrowsBackground || 'white'} !important;
+            border: none;
+            border-radius: ${options.carouselArrowsBorderRadius !== undefined ? options.carouselArrowsBorderRadius : 50}% !important;
+            width: 40px !important;
+            height: 40px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
+            z-index: 10 !important;
+            color: ${options.carouselArrowsColor || '#374151'} !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+            transition: all 0.2s !important;
+            padding: 0 !important;
+            margin: 0 !important;
         }
+        .bnnr_car_arrow:hover {
+            filter: brightness(95%) !important;
+        }
+        .bnnr_car_arrow_left { left: -20px !important; }
+        .bnnr_car_arrow_right { right: -20px !important; }
+
+        @media (max-width: 768px) {
+            .bnnr_car_arrow_left { left: 0 !important; }
+            .bnnr_car_arrow_right { right: 0 !important; }
+            .bnnr_layout_carousel .bnnr_prod_card {
+                min-width: calc((100% - (${options.mobileGridColumns || 1} - 1) * 24px) / ${options.mobileGridColumns || 1}) !important;
+                max-width: calc((100% - (${options.mobileGridColumns || 1} - 1) * 24px) / ${options.mobileGridColumns || 1}) !important;
+            }
+        }
+
+        .bnnr_car_dots {
+            display: flex !important;
+            justify-content: center !important;
+            gap: 8px !important;
+            margin-top: ${options.carouselDotsMarginTop !== undefined ? options.carouselDotsMarginTop : 16}px !important;
+        }
+
+        .bnnr_car_dot {
+            width: 8px !important;
+            height: 8px !important;
+            border-radius: 50% !important;
+            background: ${options.carouselDotsColor || '#d1d5db'} !important;
+            cursor: pointer !important;
+            border: none !important;
+            padding: 0 !important;
+            transition: all 0.2s !important;
+        }
+
+        .bnnr_car_dot.active {
+            background: ${options.carouselDotsActiveColor || options.buttonColor || '#2563eb'} !important;
+            transform: scale(1.2) !important;
+        }
+
 
         /* Grid Styles */
         .bnnr_layout_grid .bnnr_grid_wrapper {
@@ -347,13 +414,40 @@
         let contentHTML = '';
 
         if (layout === 'carousel') {
-            const duplicatedProducts = [...products, ...products];
-            const trackHTML = duplicatedProducts.map(product => renderCard(product)).join('');
+            const trackHTML = products.map(product => renderCard(product)).join('');
+
+            // Arrows
+            const arrows = options.carouselArrows !== false;
+            const leftArrow = arrows ? `
+                <button class="bnnr_car_arrow bnnr_car_arrow_left" aria-label="Predchozi">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 20px; height: 20px;">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                </button>
+            ` : '';
+            const rightArrow = arrows ? `
+                <button class="bnnr_car_arrow bnnr_car_arrow_right" aria-label="Dalsi">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 20px; height: 20px;">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                </button>
+            ` : '';
+
+            // Dots
+            const dotsEnabled = options.carouselDots !== false;
+            let dotsHTML = '';
+            if (dotsEnabled) {
+                dotsHTML = '<div class="bnnr_car_dots"></div>';
+            }
+
             contentHTML = `
                 <div class="bnnr_car_wrapper">
+                    ${leftArrow}
                     <div class="bnnr_car_track">
                         ${trackHTML}
                     </div>
+                    ${rightArrow}
+                    ${dotsHTML}
                 </div>
             `;
         } else if (layout === 'grid') {
@@ -380,6 +474,96 @@
             ${options.widgetTitle ? '<' + titleTag + titleClass + '>' + options.widgetTitle + '</' + titleTag + '>' : ''}
             ${contentHTML}
         `;
+
+        if (layout === 'carousel') {
+            const wrapper = widgetContainer.querySelector('.bnnr_car_wrapper');
+            if (wrapper) {
+                const track = wrapper.querySelector('.bnnr_car_track');
+                const leftBtn = wrapper.querySelector('.bnnr_car_arrow_left');
+                const rightBtn = wrapper.querySelector('.bnnr_car_arrow_right');
+
+                if (track) {
+                    const dotsContainer = wrapper.querySelector('.bnnr_car_dots');
+
+                    const updateActiveDot = () => {
+                         if (!dotsContainer) return;
+                         const dots = dotsContainer.querySelectorAll('.bnnr_car_dot');
+                         if (dots.length === 0) return;
+
+                         const scrollLeft = track.scrollLeft;
+                         const item = track.firstElementChild;
+                         const itemWidth = item ? (item.offsetWidth + 24) : 0;
+                         if (itemWidth === 0) return;
+
+                         let index = Math.round(scrollLeft / itemWidth);
+
+                         // Clamp index to max dots
+                         index = Math.min(index, dots.length - 1);
+
+                         dots.forEach((dot, i) => {
+                             if (i === index) dot.classList.add('active');
+                             else dot.classList.remove('active');
+                         });
+                    };
+
+                    const updateDots = () => {
+                        if (!dotsContainer) return;
+                        const isMobile = window.innerWidth <= 768;
+                        const cols = isMobile ? (options.mobileGridColumns || 1) : (options.gridColumns || 4);
+
+                        // Calculate how many distinct start positions are valid
+                        // If we have 10 items and show 4, we can scroll to indexes 0..6
+                        // So we need 7 dots.
+                        // total - visible + 1
+                        const maxIndex = Math.max(0, products.length - cols);
+                        const numDots = maxIndex + 1;
+
+                        let html = '';
+                        for (let i = 0; i < numDots; i++) {
+                            html += '<button class="bnnr_car_dot" data-index="' + i + '" aria-label="Jit na polozku ' + (i + 1) + '"></button>';
+                        }
+                        dotsContainer.innerHTML = html;
+
+                        // Rebind clicks
+                        const dots = dotsContainer.querySelectorAll('.bnnr_car_dot');
+                        dots.forEach(dot => {
+                            dot.onclick = function() {
+                                const index = parseInt(this.getAttribute('data-index'));
+                                const item = track.firstElementChild;
+                                const itemWidth = item ? (item.offsetWidth + 24) : 0;
+                                if (itemWidth > 0) {
+                                    track.scrollTo({ left: index * itemWidth, behavior: 'smooth' });
+                                }
+                            };
+                        });
+
+                        updateActiveDot();
+                    };
+
+                    track.addEventListener('scroll', updateActiveDot);
+                    window.addEventListener('resize', updateDots);
+
+                    // Initial setup
+                    updateDots();
+
+
+
+                    // Arrow logic
+                    if (leftBtn && rightBtn) {
+                        leftBtn.onclick = function() {
+                            const item = track.firstElementChild;
+                            const scrollAmount = item ? (item.offsetWidth + 24) : 300;
+                            track.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                        };
+                        rightBtn.onclick = function() {
+                            const item = track.firstElementChild;
+                            const scrollAmount = item ? (item.offsetWidth + 24) : 300;
+                            track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                        };
+                    }
+                }
+            }
+        }
     }
 
     function renderCard(product) {
