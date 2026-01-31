@@ -109,7 +109,7 @@
         .bnnr_prod_card {
             background: ${options.cardBackgroundColor || '#ffffff'};
             border-radius: ${options.cardBorderRadius !== undefined ? options.cardBorderRadius : 16}px;
-            padding: 20px;
+            padding: ${options.cardPaddingY !== undefined ? options.cardPaddingY : 20}px ${options.cardPaddingX !== undefined ? options.cardPaddingX : 20}px;
             box-shadow: ${shadowStyle};
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: center;
@@ -117,7 +117,7 @@
             flex-direction: column;
             height: 100%;
             box-sizing: border-box;
-            border: 1px solid rgba(229, 231, 235, 0.5);
+            border: ${options.cardBorderEnabled ? (options.cardBorderWidth || 1) + 'px solid ' + (options.cardBorderColor || '#e5e7eb') : 'none'};
         }
 
         .bnnr_prod_card:hover {
@@ -125,15 +125,28 @@
             box-shadow: ${hoverShadowStyle};
         }
 
-        .bnnr_prod_card img {
+        .bnnr_img_wrapper {
             width: 100%;
-            height: 180px;
-            object-fit: contain;
-            margin-bottom: 16px;
+            height: ${options.imageHeight || 192}px;
+            margin-bottom: ${options.imageMarginBottom !== undefined ? options.imageMarginBottom : 16}px;
+            padding: ${options.imagePadding || 0}px;
+            border-radius: ${options.imageBorderRadius || 0}px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            background: #ffffff;
+        }
+
+        .bnnr_img_wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: ${options.imageObjectFit || 'contain'};
             transition: transform 0.3s ease;
         }
 
-        .bnnr_prod_card:hover img {
+        .bnnr_prod_card:hover .bnnr_img_wrapper img {
             transform: scale(1.05);
         }
 
@@ -143,7 +156,8 @@
             font-style: ${options.productNameItalic ? 'italic' : 'normal'};
             font-family: ${options.productNameFont || 'inherit'};
             color: ${options.productNameColor || '#374151'};
-            margin-bottom: 12px;
+            margin-top: ${options.productNameMarginTop || 0}px;
+            margin-bottom: ${options.productNameMarginBottom !== undefined ? options.productNameMarginBottom : 12}px;
             min-height: ${options.productNameFull ? 'auto' : '44px'};
             display: -webkit-box;
             -webkit-line-clamp: ${options.productNameFull ? 'unset' : '2'};
@@ -159,7 +173,8 @@
             font-style: ${options.priceItalic ? 'italic' : 'normal'};
             font-family: ${options.priceFont || 'inherit'};
             color: ${options.priceColor || '#059669'};
-            margin-bottom: 16px;
+            margin-top: ${options.priceMarginTop || 0}px;
+            margin-bottom: ${options.priceMarginBottom !== undefined ? options.priceMarginBottom : 16}px;
             letter-spacing: -0.025em;
         }
 
@@ -175,9 +190,10 @@
             font-style: ${options.buttonItalic ? 'italic' : 'normal'};
             font-family: ${options.buttonFont || 'inherit'};
             text-decoration: none;
-            border-radius: 12px;
+            border-radius: ${options.buttonBorderRadius !== undefined ? options.buttonBorderRadius : 12}px;
             transition: all 0.2s;
-            margin-top: auto;
+            margin-top: ${options.buttonMarginTop || 0}px;
+            margin-bottom: ${options.buttonMarginBottom || 0}px;
             width: 100%;
             box-sizing: border-box;
         }
@@ -228,7 +244,7 @@
             max-width: 100%;
             padding: 16px 24px;
         }
-        .bnnr_layout_list .bnnr_prod_card img {
+        .bnnr_layout_list .bnnr_img_wrapper {
             width: 80px;
             height: 80px;
             margin-bottom: 0;
@@ -261,7 +277,7 @@
                 min-width: 180px;
                 max-width: 180px;
             }
-            .bnnr_layout_carousel .bnnr_prod_card img {
+            .bnnr_layout_carousel .bnnr_img_wrapper {
                 height: 120px;
             }
             .bnnr_layout_grid .bnnr_grid_wrapper {
@@ -271,7 +287,7 @@
                 flex-wrap: wrap;
                 padding: 16px;
             }
-            .bnnr_layout_list .bnnr_prod_card img {
+            .bnnr_layout_list .bnnr_img_wrapper {
                 width: 60px;
                 height: 60px;
                 margin-right: 16px;
@@ -349,7 +365,9 @@
     function renderCard(product) {
         return `
             <div class="bnnr_prod_card">
-                <img src="${product.imgUrl || '/placeholder.png'}" alt="${product.productName}" loading="lazy">
+                <div class="bnnr_img_wrapper">
+                    <img src="${product.imgUrl || '/placeholder.png'}" alt="${product.productName}" loading="lazy">
+                </div>
                 <div class="bnnr_prod_title" title="${product.productName.replace(/"/g, '&quot;')}">${product.productName}</div>
                 <div class="bnnr_prod_price">${formatPrice(product.priceVat, options.priceFormat || 'comma')} Kč</div>
                 <a href="${product.url}" target="_blank" rel="noopener noreferrer" class="bnnr_buy_btn">
