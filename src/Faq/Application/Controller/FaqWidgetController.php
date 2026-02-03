@@ -52,6 +52,29 @@ class FaqWidgetController extends AbstractController
         $widget->setHoverColor($data['hoverColor'] ?? null);
         $widget->setBackgroundColor($data['backgroundColor'] ?? null);
 
+        // Question styling
+        $widget->setQuestionTag($data['questionTag'] ?? null);
+        $widget->setQuestionSize($data['questionSize'] ?? null);
+        $widget->setQuestionFont($data['questionFont'] ?? null);
+        $widget->setQuestionBold($data['questionBold'] ?? null);
+        $widget->setQuestionItalic($data['questionItalic'] ?? null);
+        $widget->setQuestionAlign($data['questionAlign'] ?? null);
+        $widget->setQuestionMarginBottom($data['questionMarginBottom'] ?? null);
+
+        // Answer styling
+        $widget->setAnswerTag($data['answerTag'] ?? null);
+        $widget->setAnswerSize($data['answerSize'] ?? null);
+        $widget->setAnswerFont($data['answerFont'] ?? null);
+        $widget->setAnswerBold($data['answerBold'] ?? null);
+        $widget->setAnswerItalic($data['answerItalic'] ?? null);
+        $widget->setAnswerAlign($data['answerAlign'] ?? null);
+        $widget->setAnswerMarginBottom($data['answerMarginBottom'] ?? null);
+
+        // Arrow settings
+        $widget->setArrowPosition($data['arrowPosition'] ?? null);
+        $widget->setArrowColor($data['arrowColor'] ?? null);
+        $widget->setArrowSize($data['arrowSize'] ?? null);
+
         $this->entityManager->persist($widget);
         $this->entityManager->flush();
 
@@ -99,6 +122,63 @@ class FaqWidgetController extends AbstractController
         }
         if (isset($data['backgroundColor'])) {
             $widget->setBackgroundColor($data['backgroundColor']);
+        }
+
+        // Question styling
+        if (array_key_exists('questionTag', $data)) {
+            $widget->setQuestionTag($data['questionTag']);
+        }
+        if (array_key_exists('questionSize', $data)) {
+            $widget->setQuestionSize($data['questionSize']);
+        }
+        if (array_key_exists('questionFont', $data)) {
+            $widget->setQuestionFont($data['questionFont']);
+        }
+        if (array_key_exists('questionBold', $data)) {
+            $widget->setQuestionBold($data['questionBold']);
+        }
+        if (array_key_exists('questionItalic', $data)) {
+            $widget->setQuestionItalic($data['questionItalic']);
+        }
+        if (array_key_exists('questionAlign', $data)) {
+            $widget->setQuestionAlign($data['questionAlign']);
+        }
+        if (array_key_exists('questionMarginBottom', $data)) {
+            $widget->setQuestionMarginBottom($data['questionMarginBottom']);
+        }
+
+        // Answer styling
+        if (array_key_exists('answerTag', $data)) {
+            $widget->setAnswerTag($data['answerTag']);
+        }
+        if (array_key_exists('answerSize', $data)) {
+            $widget->setAnswerSize($data['answerSize']);
+        }
+        if (array_key_exists('answerFont', $data)) {
+            $widget->setAnswerFont($data['answerFont']);
+        }
+        if (array_key_exists('answerBold', $data)) {
+            $widget->setAnswerBold($data['answerBold']);
+        }
+        if (array_key_exists('answerItalic', $data)) {
+            $widget->setAnswerItalic($data['answerItalic']);
+        }
+        if (array_key_exists('answerAlign', $data)) {
+            $widget->setAnswerAlign($data['answerAlign']);
+        }
+        if (array_key_exists('answerMarginBottom', $data)) {
+            $widget->setAnswerMarginBottom($data['answerMarginBottom']);
+        }
+
+        // Arrow settings
+        if (array_key_exists('arrowPosition', $data)) {
+            $widget->setArrowPosition($data['arrowPosition']);
+        }
+        if (array_key_exists('arrowColor', $data)) {
+            $widget->setArrowColor($data['arrowColor']);
+        }
+        if (array_key_exists('arrowSize', $data)) {
+            $widget->setArrowSize($data['arrowSize']);
         }
         
         $widget->setUpdatedAt(new \DateTimeImmutable());

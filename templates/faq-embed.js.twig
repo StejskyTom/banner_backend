@@ -2,6 +2,32 @@
     const widgetId = 'faq-widget-{{ widget.id }}';
     const questions = {{ widget.questions|json_encode|raw }};
 
+    // Styling settings
+    const questionTag = '{{ widget.questionTag|default("h3") }}';
+    const questionColor = '{{ widget.questionColor|default("#111827") }}';
+    const questionFont = '{{ widget.questionFont|default(widget.font|default("sans-serif")) }}';
+    const questionSize = '{{ widget.questionSize|default("18px") }}';
+    const questionBold = {{ widget.questionBold is not defined or widget.questionBold ? 'true' : 'false' }};
+    const questionItalic = {{ widget.questionItalic|default(false) ? 'true' : 'false' }};
+    const questionAlign = '{{ widget.questionAlign|default("left") }}';
+    const questionMarginBottom = {{ widget.questionMarginBottom|default(8) }};
+
+    const answerTag = '{{ widget.answerTag|default("p") }}';
+    const answerColor = '{{ widget.answerColor|default("#6B7280") }}';
+    const answerFont = '{{ widget.answerFont|default(widget.font|default("sans-serif")) }}';
+    const answerSize = '{{ widget.answerSize|default("14px") }}';
+    const answerBold = {{ widget.answerBold|default(false) ? 'true' : 'false' }};
+    const answerItalic = {{ widget.answerItalic|default(false) ? 'true' : 'false' }};
+    const answerAlign = '{{ widget.answerAlign|default("left") }}';
+    const answerMarginBottom = {{ widget.answerMarginBottom|default(8) }};
+
+    const hoverColor = '{{ widget.hoverColor|default("#4f46e5") }}';
+
+    // Arrow settings
+    const arrowPosition = '{{ widget.arrowPosition|default("after") }}';
+    const arrowColor = '{{ widget.arrowColor|default("#6B7280") }}';
+    const arrowSize = {{ widget.arrowSize|default(24) }};
+
     // Create container
     const container = document.createElement('div');
     container.id = widgetId;
@@ -16,8 +42,8 @@
     style.textContent = `
         #${widgetId} .bnnr_faq_item {
             border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 8px;
-            margin-bottom: 8px;
+            padding-bottom: ${questionMarginBottom}px;
+            margin-bottom: ${questionMarginBottom}px;
         }
         #${widgetId} .bnnr_faq_item:last-child {
             border-bottom: none;
@@ -28,31 +54,48 @@
             list-style: none;
             cursor: pointer;
             display: flex;
-            justify-content: space-between;
+            justify-content: ${arrowPosition === 'right' ? 'space-between' : 'flex-start'};
             align-items: center;
             padding: 8px 0;
-            font-weight: 500;
-            color: {{ widget.questionColor|default('#111827') }};
             transition: color 0.2s;
         }
         #${widgetId} details > summary::-webkit-details-marker {
             display: none;
         }
-        #${widgetId} details > summary:hover {
-            color: {{ widget.hoverColor|default('#4f46e5') }};
+        #${widgetId} details > summary:hover .bnnr_faq_question {
+            color: ${hoverColor} !important;
+        }
+        #${widgetId} .bnnr_faq_question {
+            color: ${questionColor};
+            font-family: ${questionFont};
+            font-size: ${questionSize};
+            font-weight: ${questionBold ? 'bold' : 'normal'};
+            font-style: ${questionItalic ? 'italic' : 'normal'};
+            text-align: ${questionAlign};
+            margin: 0;
+            flex: 1;
+            transition: color 0.2s;
         }
         #${widgetId} .bnnr_faq_answer {
-            color: {{ widget.answerColor|default('#6b7280') }};
+            color: ${answerColor};
+            font-family: ${answerFont};
+            font-size: ${answerSize};
+            font-weight: ${answerBold ? 'bold' : 'normal'};
+            font-style: ${answerItalic ? 'italic' : 'normal'};
+            text-align: ${answerAlign};
             line-height: 1.6;
             margin-top: 8px;
-            font-size: 14px;
+            margin-bottom: ${answerMarginBottom}px;
         }
         #${widgetId} .bnnr_faq_icon {
-            width: 24px;
-            height: 24px;
+            width: ${arrowSize}px;
+            height: ${arrowSize}px;
+            color: ${arrowColor};
             transition: transform 0.2s;
             flex-shrink: 0;
-            margin-left: 16px;
+            margin-left: ${arrowPosition === 'left' ? 0 : '16px'};
+            margin-right: ${arrowPosition === 'left' ? '16px' : 0};
+            order: ${arrowPosition === 'left' ? -1 : 1};
         }
         #${widgetId} details[open] .bnnr_faq_icon {
             transform: rotate(180deg);
@@ -80,13 +123,13 @@
         
         const summary = document.createElement('summary');
         summary.innerHTML = `
-            <h3 style="margin:0; font-size:inherit; font-weight:inherit;">${q.question}</h3>
+            <${questionTag} class="bnnr_faq_question">${q.question}</${questionTag}>
             <svg class="bnnr_faq_icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 9l6 6 6-6" />
             </svg>
         `;
 
-        const answer = document.createElement('p');
+        const answer = document.createElement(answerTag);
         answer.className = 'bnnr_faq_answer';
         answer.innerHTML = q.answer;
 
@@ -120,3 +163,4 @@
     const currentScript = scripts[scripts.length - 1];
     currentScript.parentNode.insertBefore(container, currentScript.nextSibling);
 })();
+
