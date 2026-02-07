@@ -28,6 +28,20 @@
     const arrowColor = '{{ widget.arrowColor|default("#6B7280") }}';
     const arrowSize = {{ widget.arrowSize|default(24) }};
 
+    // Border settings
+    const borderEnabled = {{ widget.borderEnabled|default(false) ? 'true' : 'false' }};
+    const borderColor = '{{ widget.borderColor|default("#e5e7eb") }}';
+    const borderWidth = {{ widget.borderWidth|default(1) }};
+    const borderRadius = {{ widget.borderRadius|default(0) }};
+
+    // Divider settings
+    const dividerEnabled = {{ widget.dividerEnabled is not defined or widget.dividerEnabled ? 'true' : 'false' }};
+    const dividerColor = '{{ widget.dividerColor|default("#e5e7eb") }}';
+    const dividerWidth = {{ widget.dividerWidth|default(100) }};
+    const dividerHeight = {{ widget.dividerHeight|default(1) }};
+    const dividerStyle = '{{ widget.dividerStyle|default("solid") }}';
+    const dividerMargin = {{ widget.dividerMargin|default(8) }};
+
     // Create container
     const container = document.createElement('div');
     container.id = widgetId;
@@ -36,19 +50,32 @@
     container.style.margin = '0 auto';
     container.style.padding = '20px';
     container.style.backgroundColor = '{{ widget.backgroundColor|default("transparent") }}';
+    
+    if (borderEnabled) {
+        container.style.border = `${borderWidth}px solid ${borderColor}`;
+        container.style.borderRadius = `${borderRadius}px`;
+    }
 
     // Create styles
     const style = document.createElement('style');
     style.textContent = `
         #${widgetId} .bnnr_faq_item {
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom-width: ${dividerEnabled ? dividerHeight + 'px' : '0'};
+            border-bottom-color: ${dividerColor};
+            border-bottom-style: ${dividerStyle};
+            width: ${dividerWidth}%;
+            margin: 0 auto;
             padding-bottom: ${questionMarginBottom}px;
-            margin-bottom: ${questionMarginBottom}px;
+            margin-bottom: ${dividerMargin}px;
+            padding-top: ${dividerMargin}px;
+        }
+        #${widgetId} .bnnr_faq_item:first-child {
+            padding-top: 0;
         }
         #${widgetId} .bnnr_faq_item:last-child {
             border-bottom: none;
-            padding-bottom: 0;
             margin-bottom: 0;
+            padding-bottom: 0;
         }
         #${widgetId} details > summary {
             list-style: none;
