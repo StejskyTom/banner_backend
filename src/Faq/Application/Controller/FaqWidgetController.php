@@ -75,10 +75,42 @@ class FaqWidgetController extends AbstractController
         $widget->setArrowColor($data['arrowColor'] ?? null);
         $widget->setArrowSize($data['arrowSize'] ?? null);
 
+        // Border settings
+        $widget->setBorderEnabled($data['borderEnabled'] ?? null);
+        $widget->setBorderColor($data['borderColor'] ?? null);
+        $widget->setBorderWidth($data['borderWidth'] ?? null);
+        $widget->setBorderRadius($data['borderRadius'] ?? null);
+
+        // Divider settings
+        $widget->setDividerEnabled($data['dividerEnabled'] ?? null);
+        $widget->setDividerColor($data['dividerColor'] ?? null);
+        $widget->setDividerWidth($data['dividerWidth'] ?? null);
+        $widget->setDividerHeight($data['dividerHeight'] ?? null);
+        $widget->setDividerStyle($data['dividerStyle'] ?? null);
+        $widget->setDividerMargin($data['dividerMargin'] ?? null);
+
         $this->entityManager->persist($widget);
         $this->entityManager->flush();
 
         return $this->json($widget, 201, [], ['groups' => 'faq_widget:read']);
+    }
+
+    #[Route('/{id}/duplicate', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function duplicate(FaqWidget $widget): JsonResponse
+    {
+        if ($widget->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $newWidget = clone $widget;
+        $newWidget->setName($widget->getName() . ' (kopie)');
+        $newWidget->setUser($this->getUser());
+
+        $this->entityManager->persist($newWidget);
+        $this->entityManager->flush();
+
+        return $this->json($newWidget, 201, [], ['groups' => 'faq_widget:read']);
     }
 
     #[Route('/{id}', methods: ['GET'])]
@@ -180,6 +212,28 @@ class FaqWidgetController extends AbstractController
         if (array_key_exists('arrowSize', $data)) {
             $widget->setArrowSize($data['arrowSize']);
         }
+
+        // Border settings
+        if (array_key_exists('borderEnabled', $data)) {
+            $widget->setBorderEnabled($data['borderEnabled']);
+        }
+        if (array_key_exists('borderColor', $data)) {
+            $widget->setBorderColor($data['borderColor']);
+        }
+        if (array_key_exists('borderWidth', $data)) {
+            $widget->setBorderWidth($data['borderWidth']);
+        }
+        if (array_key_exists('borderRadius', $data)) {
+            $widget->setBorderRadius($data['borderRadius']);
+        }
+
+        // Divider settings
+        if (array_key_exists('dividerEnabled', $data)) $widget->setDividerEnabled($data['dividerEnabled']);
+        if (array_key_exists('dividerColor', $data)) $widget->setDividerColor($data['dividerColor']);
+        if (array_key_exists('dividerWidth', $data)) $widget->setDividerWidth($data['dividerWidth']);
+        if (array_key_exists('dividerHeight', $data)) $widget->setDividerHeight($data['dividerHeight']);
+        if (array_key_exists('dividerStyle', $data)) $widget->setDividerStyle($data['dividerStyle']);
+        if (array_key_exists('dividerMargin', $data)) $widget->setDividerMargin($data['dividerMargin']);
         
         $widget->setUpdatedAt(new \DateTimeImmutable());
 

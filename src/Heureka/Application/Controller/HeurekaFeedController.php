@@ -104,6 +104,58 @@ class HeurekaFeedController extends AbstractController
         return $this->json($updatedFeed, 200, [], ['groups' => ['feed:read']]);
     }
 
+    #[Route('/feeds/{id}/duplicate', name: 'api_heureka_feed_duplicate', methods: ['POST'])]
+    public function duplicateFeed(
+        #[MapEntity] HeurekaFeed $feed,
+        EntityManagerInterface $em
+    ): JsonResponse {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($feed->getUser() !== $user) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $newFeed = clone $feed;
+        $newFeed->setName($feed->getName() . ' (kopie)');
+        $newFeed->setUser($user); // Add setUser method to HeurekaFeed if missing, or use constructor? No, constructor is for new. Clone creates new obj.
+        // But HeurekaFeed has no setUser method in the partial view I saw.
+        // Wait, property $user is private. Clone handles shallow copy where $this->user refers to same object.
+        // We need to check if $user object is correct. Yes, it's the same user.
+        // BUT we need to copy products manually because clone resets products collection (as defined in __clone).
+        
+        $em->persist($newFeed);
+        
+        // Deep copy products
+        foreach ($feed->getProducts() as $product) {
+            $newProduct = clone $product; // Product needs __clone modification or manual cloning?
+            // Product entity likely doesn't have __clone.
+            // Let's rely on manual cloning for products to be safe and link them to new feed.
+             $newProduct = new \App\Entity\Product(
+                 $newFeed,
+                 $product->getItemId(),
+                 $product->getProductName(),
+                 $product->getPriceVat(),
+                 $product->getUrl()
+             );
+             $newProduct->setDescription($product->getDescription());
+             $newProduct->setImgUrl($product->getImgUrl());
+             $newProduct->setImgUrlAlternative($product->getImgUrlAlternative());
+             $newProduct->setManufacturer($product->getManufacturer());
+             $newProduct->setEan($product->getEan());
+             $newProduct->setProductNo($product->getProductNo());
+             $newProduct->setCategory($product->getCategory());
+             $newProduct->setIsSelected($product->isSelected());
+             $newProduct->setPosition($product->getPosition());
+             
+             $em->persist($newProduct);
+        }
+
+        $em->flush();
+
+        return $this->json($newFeed, 201, [], ['groups' => ['feed:read']]);
+    }
+
     #[Route('/feeds/{id}', name: 'api_heureka_feed_delete', methods: ['DELETE'])]
     public function deleteFeed(
         #[MapEntity] HeurekaFeed $feed,

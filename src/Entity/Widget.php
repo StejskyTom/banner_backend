@@ -22,6 +22,12 @@ class Widget
     #[Groups(['widget:read'])]
     private ?Uuid $id = null;
 
+    public function __clone()
+    {
+        $this->id = null;
+        $this->attachments = new ArrayCollection();
+    }
+
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['widget:read'])]
     private ?string $title;

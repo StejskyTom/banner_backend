@@ -20,6 +20,11 @@ class ArticleWidget
     #[Groups(['article_widget:read'])]
     private ?Uuid $id = null;
 
+    public function __clone()
+    {
+        $this->id = null;
+    }
+
     #[ORM\Column(length: 255)]
     #[Groups(['article_widget:read', 'article_widget:write'])]
     private ?string $name = null;

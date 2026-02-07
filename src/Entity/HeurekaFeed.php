@@ -20,6 +20,14 @@ class HeurekaFeed
     #[Groups(['feed:read'])]
     private ?Uuid $id = null;
 
+    public function __clone()
+    {
+        $this->id = null;
+        $this->products = new ArrayCollection();
+        $this->lastSyncedAt = null;
+        $this->productCount = 0;
+    }
+
     #[ORM\Column(length: 255)]
     #[Groups(['feed:read'])]
     private string $name;
@@ -89,6 +97,11 @@ class HeurekaFeed
     public function getUser(): User
     {
         return $this->user;
+    }
+
+    public function setUser(User $user): void
+    {
+        $this->user = $user;
     }
 
     public function getProducts(): array

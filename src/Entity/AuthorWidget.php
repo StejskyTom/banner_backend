@@ -19,6 +19,11 @@ class AuthorWidget
     #[Groups(['author_widget:read'])]
     private ?Uuid $id = null;
 
+    public function __clone()
+    {
+        $this->id = null;
+    }
+
     #[ORM\Column(length: 255)]
     #[Groups(['author_widget:read', 'author_widget:write'])]
     private ?string $name = null;

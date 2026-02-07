@@ -73,6 +73,25 @@ class ArticleWidgetController extends AbstractController
         return $this->json($widget, Response::HTTP_CREATED, [], ['groups' => ['article_widget:read']]);
     }
 
+    #[Route('/{id}/duplicate', name: 'api_article_widgets_duplicate', methods: ['POST'])]
+    public function duplicate(ArticleWidget $widget): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        if ($widget->getUser() !== $user) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $newWidget = clone $widget;
+        $newWidget->setName($widget->getName() . ' (kopie)');
+        $newWidget->setUser($user);
+
+        $this->entityManager->persist($newWidget);
+        $this->entityManager->flush();
+
+        return $this->json($newWidget, Response::HTTP_CREATED, [], ['groups' => ['article_widget:read']]);
+    }
+
     #[Route('/{id}', name: 'api_article_widgets_update', methods: ['PUT'])]
     public function update(Request $request, ArticleWidget $widget): JsonResponse
     {

@@ -54,6 +54,38 @@ class CreateController extends AbstractController
         return $this->json($widget, 200, [], ['groups' => ['widget:read']]);
     }
 
+    #[Route('/widgets/{id}/duplicate', name: 'api_widgets_duplicate', methods: ['POST'])]
+    public function duplicateWidget(
+        #[MapEntity] Widget $widget,
+        EntityManagerInterface $em
+    ): JsonResponse {
+        if ($widget->getUser() !== $this->getUser()) {
+            throw new WidgetNotFound('Widget nenalezen');
+        }
+
+        $newWidget = clone $widget;
+        $newWidget->setTitle($widget->getTitle() . ' (kopie)');
+        $newWidget->setUser($this->getUser());
+        
+        $em->persist($newWidget);
+        $em->flush();
+
+        // Manually duplicate attachments
+        foreach ($widget->getAttachments() as $attachment) {
+            $newAttachment = new Attachment($newWidget, $attachment->getUrl());
+            $newAttachment->setPosition($attachment->getPosition());
+            $newAttachment->setIsExternal($attachment->isExternal());
+            $newAttachment->setLink($attachment->getLink());
+            $newAttachment->setAlt($attachment->getAlt());
+            
+            $em->persist($newAttachment);
+        }
+
+        $em->flush();
+
+        return $this->json($newWidget, 201, [], ['groups' => ['widget:read']]);
+    }
+
     #[Route('/widgets/{id}', name: 'api_widgets_update', methods: ['PUT'])]
     public function updateWidget(
         #[MapEntity] Widget $widget,

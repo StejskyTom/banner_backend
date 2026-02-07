@@ -65,6 +65,24 @@ class AuthorWidgetController extends AbstractController
         return $this->json($widget, 201, [], ['groups' => 'author_widget:read']);
     }
 
+    #[Route('/{id}/duplicate', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function duplicate(AuthorWidget $widget): JsonResponse
+    {
+        if ($widget->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $newWidget = clone $widget;
+        $newWidget->setName($widget->getName() . ' (kopie)');
+        $newWidget->setUser($this->getUser());
+
+        $this->entityManager->persist($newWidget);
+        $this->entityManager->flush();
+
+        return $this->json($newWidget, 201, [], ['groups' => 'author_widget:read']);
+    }
+
     #[Route('/{id}', methods: ['GET'])]
     #[IsGranted('ROLE_USER')]
     public function show(AuthorWidget $widget): JsonResponse

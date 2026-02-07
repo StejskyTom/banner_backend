@@ -19,6 +19,11 @@ class FaqWidget
     #[Groups(['faq_widget:read'])]
     private ?Uuid $id = null;
 
+    public function __clone()
+    {
+        $this->id = null;
+    }
+
     #[ORM\Column(length: 255)]
     #[Groups(['faq_widget:read', 'faq_widget:write'])]
     private ?string $name = null;
@@ -129,6 +134,44 @@ class FaqWidget
     #[ORM\Column(nullable: true)]
     #[Groups(['faq_widget:read', 'faq_widget:write'])]
     private ?int $arrowSize = null;
+
+    // Border settings
+    #[ORM\Column(nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?bool $borderEnabled = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?string $borderColor = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?int $borderWidth = null;
+
+    // Divider settings
+    #[ORM\Column(nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?bool $dividerEnabled = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?string $dividerColor = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?int $dividerWidth = null; // in percent
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?int $dividerHeight = null; // in px
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?string $dividerStyle = null; // solid, dashed, dotted
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?int $dividerMargin = null; // vertical margin in px
 
     public function __construct()
     {
@@ -449,6 +492,113 @@ class FaqWidget
     public function setArrowSize(?int $arrowSize): static
     {
         $this->arrowSize = $arrowSize;
+        return $this;
+    }
+
+    // Border getters/setters
+    public function isBorderEnabled(): ?bool
+    {
+        return $this->borderEnabled;
+    }
+
+    public function setBorderEnabled(?bool $borderEnabled): static
+    {
+        $this->borderEnabled = $borderEnabled;
+        return $this;
+    }
+
+    public function getBorderColor(): ?string
+    {
+        return $this->borderColor;
+    }
+
+    public function setBorderColor(?string $borderColor): static
+    {
+        $this->borderColor = $borderColor;
+        return $this;
+    }
+
+    public function getBorderWidth(): ?int
+    {
+        return $this->borderWidth;
+    }
+
+    public function setBorderWidth(?int $borderWidth): static
+    {
+        $this->borderWidth = $borderWidth;
+        return $this;
+    }
+
+    // Divider methods
+    public function isDividerEnabled(): ?bool
+    {
+        return $this->dividerEnabled;
+    }
+
+    public function setDividerEnabled(?bool $dividerEnabled): static
+    {
+        $this->dividerEnabled = $dividerEnabled;
+
+        return $this;
+    }
+
+    public function getDividerColor(): ?string
+    {
+        return $this->dividerColor;
+    }
+
+    public function setDividerColor(?string $dividerColor): static
+    {
+        $this->dividerColor = $dividerColor;
+
+        return $this;
+    }
+
+    public function getDividerWidth(): ?int
+    {
+        return $this->dividerWidth;
+    }
+
+    public function setDividerWidth(?int $dividerWidth): static
+    {
+        $this->dividerWidth = $dividerWidth;
+
+        return $this;
+    }
+
+    public function getDividerHeight(): ?int
+    {
+        return $this->dividerHeight;
+    }
+
+    public function setDividerHeight(?int $dividerHeight): static
+    {
+        $this->dividerHeight = $dividerHeight;
+
+        return $this;
+    }
+
+    public function getDividerStyle(): ?string
+    {
+        return $this->dividerStyle;
+    }
+
+    public function setDividerStyle(?string $dividerStyle): static
+    {
+        $this->dividerStyle = $dividerStyle;
+
+        return $this;
+    }
+
+    public function getDividerMargin(): ?int
+    {
+        return $this->dividerMargin;
+    }
+
+    public function setDividerMargin(?int $dividerMargin): static
+    {
+        $this->dividerMargin = $dividerMargin;
+
         return $this;
     }
 }
