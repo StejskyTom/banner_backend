@@ -40,7 +40,7 @@
     const dividerWidth = {{ widget.dividerWidth|default(100) }};
     const dividerHeight = {{ widget.dividerHeight|default(1) }};
     const dividerStyle = '{{ widget.dividerStyle|default("solid") }}';
-    const dividerMargin = {{ widget.dividerMargin|default(8) }};
+    const dividerMargin = {{ widget.dividerMargin is not null ? widget.dividerMargin : 8 }};
 
     // Create container
     const container = document.createElement('div');
@@ -60,22 +60,28 @@
     const style = document.createElement('style');
     style.textContent = `
         #${widgetId} .bnnr_faq_item {
-            border-bottom-width: ${dividerEnabled ? dividerHeight + 'px' : '0'};
-            border-bottom-color: ${dividerColor};
-            border-bottom-style: ${dividerStyle};
-            width: ${dividerWidth}%;
+            width: 100%;
             margin: 0 auto;
-            padding-bottom: ${questionMarginBottom}px;
-            margin-bottom: ${dividerMargin}px;
+            padding-bottom: ${dividerMargin}px;
+            margin-bottom: 0px;
             padding-top: ${dividerMargin}px;
         }
         #${widgetId} .bnnr_faq_item:first-child {
             padding-top: 0;
         }
         #${widgetId} .bnnr_faq_item:last-child {
-            border-bottom: none;
             margin-bottom: 0;
             padding-bottom: 0;
+        }
+        #${widgetId} .bnnr_faq_divider {
+            border: none;
+            height: ${dividerHeight}px;
+            background-color: ${dividerColor};
+            width: ${dividerWidth}%;
+            margin: 0 auto;
+            /* Support for dashed/dotted styles if needed */
+            border-top: ${dividerStyle !== 'solid' ? dividerHeight + 'px ' + dividerStyle + ' ' + dividerColor : 'none'};
+            background-color: ${dividerStyle !== 'solid' ? 'transparent' : dividerColor};
         }
         #${widgetId} details > summary {
             list-style: none;
@@ -142,7 +148,7 @@
     {% endif %}
 
     // Render questions
-    questions.forEach((q) => {
+    questions.forEach((q, index) => {
         const item = document.createElement('div');
         item.className = 'bnnr_faq_item';
 
@@ -163,7 +169,15 @@
         details.appendChild(summary);
         details.appendChild(answer);
         item.appendChild(details);
+        
         container.appendChild(item);
+
+        // Add divider if enabled and not last item
+        if (dividerEnabled && index < questions.length - 1) {
+             const divider = document.createElement('hr');
+             divider.className = 'bnnr_faq_divider';
+             container.appendChild(divider);
+        }
     });
 
     // JSON-LD Structured Data

@@ -148,6 +148,10 @@ class FaqWidget
     #[Groups(['faq_widget:read', 'faq_widget:write'])]
     private ?int $borderWidth = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?int $borderRadius = null;
+
     // Divider settings
     #[ORM\Column(nullable: true)]
     #[Groups(['faq_widget:read', 'faq_widget:write'])]
@@ -526,6 +530,17 @@ class FaqWidget
     public function setBorderWidth(?int $borderWidth): static
     {
         $this->borderWidth = $borderWidth;
+        return $this;
+    }
+
+    public function getBorderRadius(): ?int
+    {
+        return $this->borderRadius;
+    }
+
+    public function setBorderRadius(?int $borderRadius): static
+    {
+        $this->borderRadius = $borderRadius;
         return $this;
     }
 
