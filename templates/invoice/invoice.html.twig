@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 12px;
+            color: #1e293b;
+            line-height: 1.5;
+        }
+        .invoice-container {
+            padding: 40px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 3px solid #6366f1;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header-left {
+            float: left;
+        }
+        .header-right {
+            float: right;
+            text-align: right;
+        }
+        .company-name {
+            font-size: 22px;
+            font-weight: bold;
+            color: #6366f1;
+        }
+        .invoice-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+        .invoice-number {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        /* Info sections */
+        .info-section {
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .info-block {
+            float: left;
+            width: 48%;
+        }
+        .info-block.right {
+            float: right;
+        }
+        .info-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .info-value {
+            font-size: 12px;
+            color: #334155;
+            margin-bottom: 3px;
+        }
+        .info-value strong {
+            color: #1e293b;
+        }
+
+        /* Table */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        .items-table th {
+            background-color: #6366f1;
+            color: white;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 10px 12px;
+            text-align: left;
+        }
+        .items-table th:last-child {
+            text-align: right;
+        }
+        .items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 12px;
+        }
+        .items-table td:last-child {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        /* Totals */
+        .totals {
+            float: right;
+            width: 300px;
+        }
+        .totals-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+        .totals-label {
+            float: left;
+            color: #64748b;
+            font-size: 12px;
+        }
+        .totals-value {
+            float: right;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        .totals-row.total {
+            border-bottom: none;
+            border-top: 2px solid #6366f1;
+            margin-top: 5px;
+            padding-top: 10px;
+        }
+        .totals-row.total .totals-label,
+        .totals-row.total .totals-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        /* Status badge */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-paid { background: #dcfce7; color: #166534; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-cancelled { background: #f1f5f9; color: #475569; }
+        .status-failed { background: #fde2e2; color: #991b1b; }
+
+        /* Footer */
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 10px;
+        }
+
+        .clearfix::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <!-- Header -->
+        <div class="header clearfix">
+            <div class="header-left">
+                <div class="company-name">Banner</div>
+                <div style="color: #64748b; margin-top: 5px;">Platforma pro tvorbu widgetů</div>
+            </div>
+            <div class="header-right">
+                <div class="invoice-title">FAKTURA</div>
+                <div class="invoice-number">{{ payment.invoiceNumber ?? 'N/A' }}</div>
+            </div>
+        </div>
+
+        <!-- Billing info -->
+        <div class="info-section clearfix">
+            <div class="info-block">
+                <div class="info-label">Dodavatel</div>
+                <div class="info-value"><strong>Banner s.r.o.</strong></div>
+                <div class="info-value">IČO: 00000000</div>
+                <div class="info-value">DIČ: CZ00000000</div>
+            </div>
+            <div class="info-block right">
+                <div class="info-label">Odběratel</div>
+                {% if billing.billingName is defined and billing.billingName %}
+                    <div class="info-value"><strong>{{ billing.billingName }}</strong></div>
+                {% else %}
+                    <div class="info-value"><strong>{{ payment.user.email }}</strong></div>
+                {% endif %}
+                {% if billing.billingIco is defined and billing.billingIco %}
+                    <div class="info-value">IČO: {{ billing.billingIco }}</div>
+                {% endif %}
+                {% if billing.billingDic is defined and billing.billingDic %}
+                    <div class="info-value">DIČ: {{ billing.billingDic }}</div>
+                {% endif %}
+                {% if billing.billingStreet is defined and billing.billingStreet %}
+                    <div class="info-value">{{ billing.billingStreet }}</div>
+                {% endif %}
+                {% if billing.billingCity is defined and billing.billingCity %}
+                    <div class="info-value">{{ billing.billingZip is defined ? billing.billingZip ~ ' ' : '' }}{{ billing.billingCity }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Dates & Status -->
+        <div class="info-section clearfix">
+            <div class="info-block">
+                <div class="info-label">Datum vystavení</div>
+                <div class="info-value">{{ payment.createdAt ? payment.createdAt|date('d.m.Y') : 'N/A' }}</div>
+            </div>
+            <div class="info-block right">
+                <div class="info-label">Stav platby</div>
+                <div class="info-value">
+                    {% set statusMap = {'paid': 'Zaplaceno', 'pending': 'Čeká na platbu', 'cancelled': 'Zrušeno', 'failed': 'Selhalo'} %}
+                    <span class="status-badge status-{{ payment.status }}">
+                        {{ statusMap[payment.status] ?? payment.status }}
+                    </span>
+                </div>
+                {% if payment.paidAt %}
+                    <div class="info-value" style="margin-top: 5px; color: #64748b;">
+                        Zaplaceno: {{ payment.paidAt|date('d.m.Y') }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Items -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Popis</th>
+                    <th style="text-align: right;">Částka</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ payment.description ?? 'Služba Banner' }}</td>
+                    <td>{{ payment.amount|number_format(2, ',', ' ') }} {{ payment.currency }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Totals -->
+        <div class="totals">
+            <div class="totals-row clearfix">
+                <span class="totals-label">Základ</span>
+                <span class="totals-value">{{ payment.amount|number_format(2, ',', ' ') }} {{ payment.currency }}</span>
+            </div>
+            <div class="totals-row clearfix">
+                <span class="totals-label">DPH (0 %)</span>
+                <span class="totals-value">0,00 {{ payment.currency }}</span>
+            </div>
+            <div class="totals-row total clearfix">
+                <span class="totals-label">Celkem</span>
+                <span class="totals-value">{{ payment.amount|number_format(2, ',', ' ') }} {{ payment.currency }}</span>
+            </div>
+        </div>
+
+        <div style="clear: both;"></div>
+
+        <!-- Footer -->
+        <div class="footer">
+            Vygenerováno systémem Banner · {{ "now"|date('d.m.Y H:i') }}
+        </div>
+    </div>
+</body>
+</html>

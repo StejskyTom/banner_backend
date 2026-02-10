@@ -1,0 +1,231 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block head_javascript %}
+    {{ parent() }}
+    {{ importmap('app') }}
+{% endblock %}
+
+{% block head_stylesheets %}
+    {{ parent() }}
+    <style>
+        /* ── Dashboard custom styles ── */
+        .dashboard-content {
+            --color-indigo: #6366f1;
+            --color-sky: #0ea5e9;
+            --color-emerald: #10b981;
+            --color-amber: #f59e0b;
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        /* Stat cards */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 1.75rem;
+        }
+        @media (max-width: 1100px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px)  { .stat-grid { grid-template-columns: 1fr; } }
+
+        .stat-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.125rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,.04);
+            transition: box-shadow .2s, transform .2s;
+        }
+        .stat-card:hover {
+            box-shadow: 0 6px 20px rgba(0,0,0,.07);
+            transform: translateY(-2px);
+            border-color: #cbd5e1;
+        }
+        .stat-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .stat-icon--indigo  { background: linear-gradient(135deg, #818cf8, #6366f1); }
+        .stat-icon--sky     { background: linear-gradient(135deg, #38bdf8, #0ea5e9); }
+        .stat-icon--emerald { background: linear-gradient(135deg, #34d399, #10b981); }
+        .stat-icon--amber   { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+
+        .stat-info { min-width: 0; }
+        .stat-value {
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+        .stat-label {
+            font-size: .8rem;
+            font-weight: 500;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            margin-top: 2px;
+        }
+
+        /* Chart cards */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+        @media (max-width: 900px) { .chart-grid { grid-template-columns: 1fr; } }
+
+        .chart-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.04);
+            overflow: hidden;
+        }
+        .chart-card__header {
+            padding: 1.25rem 1.5rem .75rem;
+            display: flex;
+            align-items: center;
+            gap: .625rem;
+        }
+        .chart-card__dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .chart-card__title {
+            font-size: .9rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .chart-card__subtitle {
+            font-size: .75rem;
+            color: #94a3b8;
+            font-weight: 400;
+            margin-left: auto;
+        }
+        .chart-card__body {
+            padding: 0 1.25rem 1.25rem;
+            position: relative;
+            height: 260px;
+        }
+        .chart-card__body canvas {
+            max-height: 100% !important;
+        }
+
+        /* Bottom row: doughnut + revenue side by side */
+        .chart-grid--bottom {
+            grid-template-columns: 340px 1fr;
+        }
+        @media (max-width: 900px) { .chart-grid--bottom { grid-template-columns: 1fr; } }
+
+        .chart-card__body--doughnut {
+            height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+    </style>
+{% endblock %}
+
+{% block content_title %}{% endblock %}
+
+{% block main %}
+<div class="dashboard-content">
+
+    {# ── Stat cards ── #}
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-icon stat-icon--indigo"><i class="fas fa-users"></i></div>
+            <div class="stat-info">
+                <div class="stat-value">{{ total_users }}</div>
+                <div class="stat-label">Uživatelé</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon stat-icon--sky"><i class="fas fa-layer-group"></i></div>
+            <div class="stat-info">
+                <div class="stat-value">{{ total_widgets }}</div>
+                <div class="stat-label">Widgety</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon stat-icon--emerald"><i class="fas fa-credit-card"></i></div>
+            <div class="stat-info">
+                <div class="stat-value">{{ active_subscriptions }}</div>
+                <div class="stat-label">Aktivní předplatné</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon stat-icon--amber"><i class="fas fa-coins"></i></div>
+            <div class="stat-info">
+                <div class="stat-value">{{ total_revenue|number_format(0, ',', ' ') }}&nbsp;Kč</div>
+                <div class="stat-label">Celkové příjmy</div>
+            </div>
+        </div>
+    </div>
+
+    {# ── Top charts: Registrations + Widgets ── #}
+    <div class="chart-grid">
+        <div class="chart-card">
+            <div class="chart-card__header">
+                <span class="chart-card__dot" style="background:#6366f1"></span>
+                <span class="chart-card__title">Registrace uživatelů</span>
+                <span class="chart-card__subtitle">posledních 30 dní</span>
+            </div>
+            <div class="chart-card__body">
+                {{ render_chart(chart_registrations) }}
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-card__header">
+                <span class="chart-card__dot" style="background:#0ea5e9"></span>
+                <span class="chart-card__title">Vytvořené widgety</span>
+                <span class="chart-card__subtitle">všechny typy / posledních 30 dní</span>
+            </div>
+            <div class="chart-card__body">
+                {{ render_chart(chart_widgets) }}
+            </div>
+        </div>
+    </div>
+
+    {# ── Bottom charts: Subscriptions doughnut + Revenue ── #}
+    <div class="chart-grid chart-grid--bottom">
+        <div class="chart-card">
+            <div class="chart-card__header">
+                <span class="chart-card__dot" style="background:#10b981"></span>
+                <span class="chart-card__title">Předplatné</span>
+                <span class="chart-card__subtitle">placené vs trial</span>
+            </div>
+            <div class="chart-card__body chart-card__body--doughnut">
+                {{ render_chart(chart_subscriptions) }}
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-card__header">
+                <span class="chart-card__dot" style="background:#10b981"></span>
+                <span class="chart-card__title">Příjmy</span>
+                <span class="chart-card__subtitle">posledních 30 dní</span>
+            </div>
+            <div class="chart-card__body">
+                {{ render_chart(chart_revenue) }}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

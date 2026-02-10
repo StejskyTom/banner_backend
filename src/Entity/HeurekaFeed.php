@@ -60,6 +60,10 @@ class HeurekaFeed
     #[Groups(['feed:read'])]
     private ?array $layoutOptions = null;
 
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[Groups(['feed:read'])]
+    private ?\DateTimeImmutable $createdAt = null;
+
     public function __construct(User $user, string $name, string $url)
     {
         $this->user = $user;
@@ -67,6 +71,7 @@ class HeurekaFeed
         $this->url = $url;
         $this->products = new ArrayCollection();
         $this->layout = 'carousel';
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?Uuid
@@ -165,5 +170,15 @@ class HeurekaFeed
     public function setLayoutOptions(?array $layoutOptions): void
     {
         $this->layoutOptions = $layoutOptions;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(?\DateTimeImmutable $createdAt): void
+    {
+        $this->createdAt = $createdAt;
     }
 }
