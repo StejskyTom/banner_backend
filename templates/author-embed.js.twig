@@ -11,6 +11,11 @@
     container.style.padding = '30px';
     container.style.backgroundColor = '{{ widget.backgroundColor|default("#ffffff") }}';
     container.style.borderRadius = '{{ widget.borderRadius|default(16) }}px';
+    {% if s.borderEnabled|default(false) %}
+    container.style.border = '{{ s.borderWidth|default(1) }}px solid {{ s.borderColor|default("#e5e7eb") }}';
+    {% else %}
+    container.style.border = 'none';
+    {% endif %}
     container.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
     container.style.textAlign = 'center';
 
@@ -18,14 +23,17 @@
     const style = document.createElement('style');
     style.textContent = `
         #${widgetId} .bnnr_auth_photo {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
+            width: {{ s.photoSize|default(128) }}px;
+            height: {{ s.photoSize|default(128) }}px;
+            border-radius: {{ s.photoRadius|default(50) }}%;
             object-fit: cover;
-            margin: 0 auto 20px auto;
-            border: 4px solid #f3f4f6;
+            margin: 0 auto {{ s.photoMarginBottom|default(20) }}px auto;
+            border: {{ s.photoBorderWidth|default(4) }}px solid {{ s.photoBorderColor|default('#f3f4f6') }};
             display: block;
             flex-shrink: 0;
+            {% if s.photoShadow|default(false) %}
+            box-shadow: 0 {{ ((s.photoShadowBlur|default(12)) / 3)|round }}px {{ s.photoShadowBlur|default(12) }}px rgba(0,0,0,{{ (s.photoShadowOpacity|default(25)) / 100 }});
+            {% endif %}
         }
         #${widgetId} .bnnr_auth_name {
             font-size: {{ s.nameSize|default('24px') }};
@@ -67,8 +75,6 @@
         }
         #${widgetId}.bnnr_layout_side .bnnr_auth_photo {
             margin: 0;
-            width: 150px;
-            height: 150px;
         }
         #${widgetId}.bnnr_layout_side .bnnr_auth_content {
             flex: 1;
