@@ -42,11 +42,11 @@ class AuthorWidgetController extends AbstractController
     public function create(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        
+
         $widget = new AuthorWidget();
         $widget->setName($data['name'] ?? 'Nový Autor');
         $widget->setUser($this->getUser());
-        
+
         // Optional initial data
         if (isset($data['authorName'])) $widget->setAuthorName($data['authorName']);
         if (isset($data['authorTitle'])) $widget->setAuthorTitle($data['authorTitle']);
@@ -117,7 +117,7 @@ class AuthorWidgetController extends AbstractController
         if (isset($data['bioColor'])) $widget->setBioColor($data['bioColor']);
         if (isset($data['titleColor'])) $widget->setTitleColor($data['titleColor']);
         if (array_key_exists('settings', $data)) $widget->setSettings($data['settings']);
-        
+
         $widget->setUpdatedAt(new \DateTimeImmutable());
 
         $this->entityManager->flush();
@@ -151,7 +151,7 @@ class AuthorWidgetController extends AbstractController
         $response = new Response();
         $response->setLastModified($widget->getUpdatedAt());
         $response->setPublic();
-        
+
         // Check if the response has not been modified
         if ($response->isNotModified($request)) {
             return $response;
@@ -159,7 +159,7 @@ class AuthorWidgetController extends AbstractController
 
         $content = $this->cache->get('author_widget_embed_' . $widget->getId(), function (ItemInterface $item) use ($widget) {
             $item->expiresAfter(3600 * 24); // Server cache for 24 hours
-            
+
             return $this->renderView('author-embed.js.twig', [
                 'widget' => $widget,
             ]);
@@ -169,14 +169,14 @@ class AuthorWidgetController extends AbstractController
         $response->headers->set('Content-Type', 'application/javascript');
         // Force browser to revalidate with server every time
         $response->headers->set('Cache-Control', 'public, no-cache');
-        
+
         return $response;
     }
 
     #[Route('/{id}/upload', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
     public function uploadPhoto(
-        Request $request, 
+        Request $request,
         AuthorWidget $widget,
         #[Autowire('%server_domain%')] string $server_domain = ''
     ): JsonResponse
@@ -200,7 +200,7 @@ class AuthorWidgetController extends AbstractController
         }
 
         $publicDir = $this->getParameter('app.public_dir');
-        
+
         // Auto-detection for shared hosting (Endora)
         if ($publicDir === 'public' && is_dir($this->getParameter('kernel.project_dir') . '/public_html')) {
             $publicDir = 'public_html';
@@ -220,7 +220,7 @@ class AuthorWidgetController extends AbstractController
 
         $widget->setAuthorPhotoUrl($publicUrl);
         $widget->setUpdatedAt(new \DateTimeImmutable());
-        
+
         $this->entityManager->flush();
 
         // Invalidate cache

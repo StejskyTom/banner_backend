@@ -358,4 +358,20 @@
     html += `</div>`; // End inner
     container.innerHTML = html;
 
+    // Track View
+    (function() {
+        try {
+            fetch('{{ app.request.schemeAndHttpHost }}/api/widget/track', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    widgetId: widgetId, 
+                    widgetType: 'article' 
+                }),
+                keepalive: true,
+                credentials: 'omit'
+            }).catch(function() {});
+        } catch (e) {}
+    })();
+
 })();

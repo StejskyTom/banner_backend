@@ -618,4 +618,20 @@
     } else {
         renderWidget();
     }
+
+    // Track View
+    (function() {
+        try {
+            fetch('{{ app.request.schemeAndHttpHost }}/api/widget/track', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    widgetId: feedId, 
+                    widgetType: 'heureka' 
+                }),
+                keepalive: true,
+                credentials: 'omit'
+            }).catch(function() {});
+        } catch (e) {}
+    })();
 })();

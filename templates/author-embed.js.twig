@@ -170,4 +170,20 @@
     const scripts = document.getElementsByTagName('script');
     const currentScript = scripts[scripts.length - 1];
     currentScript.parentNode.insertBefore(container, currentScript.nextSibling);
+
+    // Track View
+    (function() {
+        try {
+            fetch('{{ app.request.schemeAndHttpHost }}/api/widget/track', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    widgetId: '{{ widget.id }}', 
+                    widgetType: 'author' 
+                }),
+                keepalive: true,
+                credentials: 'omit'
+            }).catch(function() {});
+        } catch (e) {}
+    })();
 })();

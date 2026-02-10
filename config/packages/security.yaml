@@ -63,6 +63,7 @@ security:
         - { path: ^/api/author-widgets/.+/embed\.js$, roles: PUBLIC_ACCESS }
         - { path: ^/api/article-widgets/.+/embed\.js$, roles: PUBLIC_ACCESS }
         - { path: ^/api/faq-widgets/.+/embed\.js$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/widget/track, roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: ROLE_USER }
 
 when@test:
