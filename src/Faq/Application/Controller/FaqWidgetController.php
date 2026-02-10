@@ -89,6 +89,27 @@ class FaqWidgetController extends AbstractController
         $widget->setDividerStyle($data['dividerStyle'] ?? null);
         $widget->setDividerMargin($data['dividerMargin'] ?? null);
 
+        // Title settings
+        $widget->setTitleTag($data['titleTag'] ?? null);
+        $widget->setTitleColor($data['titleColor'] ?? null);
+        $widget->setTitleSize($data['titleSize'] ?? null);
+        $widget->setTitleFont($data['titleFont'] ?? null);
+        $widget->setTitleBold($data['titleBold'] ?? null);
+        $widget->setTitleItalic($data['titleItalic'] ?? null);
+        $widget->setTitleAlign($data['titleAlign'] ?? null);
+        $widget->setTitleMarginBottom($data['titleMarginBottom'] ?? null);
+
+        // Subtitle settings
+        $widget->setSubtitleText($data['subtitleText'] ?? null);
+        $widget->setSubtitleTag($data['subtitleTag'] ?? null);
+        $widget->setSubtitleColor($data['subtitleColor'] ?? null);
+        $widget->setSubtitleSize($data['subtitleSize'] ?? null);
+        $widget->setSubtitleFont($data['subtitleFont'] ?? null);
+        $widget->setSubtitleBold($data['subtitleBold'] ?? null);
+        $widget->setSubtitleItalic($data['subtitleItalic'] ?? null);
+        $widget->setSubtitleAlign($data['subtitleAlign'] ?? null);
+        $widget->setSubtitleMarginBottom($data['subtitleMarginBottom'] ?? null);
+
         $this->entityManager->persist($widget);
         $this->entityManager->flush();
 
@@ -234,6 +255,27 @@ class FaqWidgetController extends AbstractController
         if (array_key_exists('dividerHeight', $data)) $widget->setDividerHeight($data['dividerHeight']);
         if (array_key_exists('dividerStyle', $data)) $widget->setDividerStyle($data['dividerStyle']);
         if (array_key_exists('dividerMargin', $data)) $widget->setDividerMargin($data['dividerMargin']);
+        
+        // Title settings
+        if (array_key_exists('titleTag', $data)) $widget->setTitleTag($data['titleTag']);
+        if (array_key_exists('titleColor', $data)) $widget->setTitleColor($data['titleColor']);
+        if (array_key_exists('titleSize', $data)) $widget->setTitleSize($data['titleSize']);
+        if (array_key_exists('titleFont', $data)) $widget->setTitleFont($data['titleFont']);
+        if (array_key_exists('titleBold', $data)) $widget->setTitleBold($data['titleBold']);
+        if (array_key_exists('titleItalic', $data)) $widget->setTitleItalic($data['titleItalic']);
+        if (array_key_exists('titleAlign', $data)) $widget->setTitleAlign($data['titleAlign']);
+        if (array_key_exists('titleMarginBottom', $data)) $widget->setTitleMarginBottom($data['titleMarginBottom']);
+
+        // Subtitle settings
+        if (array_key_exists('subtitleText', $data)) $widget->setSubtitleText($data['subtitleText']);
+        if (array_key_exists('subtitleTag', $data)) $widget->setSubtitleTag($data['subtitleTag']);
+        if (array_key_exists('subtitleColor', $data)) $widget->setSubtitleColor($data['subtitleColor']);
+        if (array_key_exists('subtitleSize', $data)) $widget->setSubtitleSize($data['subtitleSize']);
+        if (array_key_exists('subtitleFont', $data)) $widget->setSubtitleFont($data['subtitleFont']);
+        if (array_key_exists('subtitleBold', $data)) $widget->setSubtitleBold($data['subtitleBold']);
+        if (array_key_exists('subtitleItalic', $data)) $widget->setSubtitleItalic($data['subtitleItalic']);
+        if (array_key_exists('subtitleAlign', $data)) $widget->setSubtitleAlign($data['subtitleAlign']);
+        if (array_key_exists('subtitleMarginBottom', $data)) $widget->setSubtitleMarginBottom($data['subtitleMarginBottom']);
         
         $widget->setUpdatedAt(new \DateTimeImmutable());
 

@@ -42,6 +42,26 @@
     const dividerStyle = '{{ widget.dividerStyle|default("solid") }}';
     const dividerMargin = {{ widget.dividerMargin is not null ? widget.dividerMargin : 8 }};
 
+    // Title settings
+    const titleTag = '{{ widget.titleTag|default("h2") }}';
+    const titleColor = '{{ widget.titleColor|default("#111827") }}';
+    const titleFont = '{{ widget.titleFont|default(widget.font|default("sans-serif")) }}';
+    const titleSize = '{{ widget.titleSize|default("24px") }}';
+    const titleBold = {{ widget.titleBold|default(false) ? 'true' : 'false' }};
+    const titleItalic = {{ widget.titleItalic|default(false) ? 'true' : 'false' }};
+    const titleAlign = '{{ widget.titleAlign|default("center") }}';
+    const titleMarginBottom = {{ widget.titleMarginBottom|default(12) }};
+
+    // Subtitle settings
+    const subtitleTag = '{{ widget.subtitleTag|default("p") }}';
+    const subtitleColor = '{{ widget.subtitleColor|default("#6B7280") }}';
+    const subtitleFont = '{{ widget.subtitleFont|default(widget.font|default("sans-serif")) }}';
+    const subtitleSize = '{{ widget.subtitleSize|default("16px") }}';
+    const subtitleBold = {{ widget.subtitleBold|default(false) ? 'true' : 'false' }};
+    const subtitleItalic = {{ widget.subtitleItalic|default(false) ? 'true' : 'false' }};
+    const subtitleAlign = '{{ widget.subtitleAlign|default("center") }}';
+    const subtitleMarginBottom = {{ widget.subtitleMarginBottom|default(24) }};
+
     // Create container
     const container = document.createElement('div');
     container.id = widgetId;
@@ -59,6 +79,28 @@
     // Create styles
     const style = document.createElement('style');
     style.textContent = `
+        #${widgetId} .bnnr_faq_title {
+            color: ${titleColor};
+            font-family: ${titleFont};
+            font-size: ${titleSize};
+            font-weight: ${titleBold ? 'bold' : 'normal'};
+            font-style: ${titleItalic ? 'italic' : 'normal'};
+            text-align: ${titleAlign};
+            margin: 0;
+            margin-bottom: ${titleMarginBottom}px;
+            line-height: 1.2;
+        }
+        #${widgetId} .bnnr_faq_subtitle {
+            color: ${subtitleColor};
+            font-family: ${subtitleFont};
+            font-size: ${subtitleSize};
+            font-weight: ${subtitleBold ? 'bold' : 'normal'};
+            font-style: ${subtitleItalic ? 'italic' : 'normal'};
+            text-align: ${subtitleAlign};
+            margin: 0;
+            margin-bottom: ${subtitleMarginBottom}px;
+            line-height: 1.5;
+        }
         #${widgetId} .bnnr_faq_item {
             width: 100%;
             margin: 0 auto;
@@ -75,13 +117,11 @@
         }
         #${widgetId} .bnnr_faq_divider {
             border: none;
-            height: ${dividerHeight}px;
-            background-color: ${dividerColor};
+            height: 0px;
+            border-top: ${dividerHeight}px ${dividerStyle} ${dividerColor};
+            background-color: transparent;
             width: ${dividerWidth}%;
             margin: 0 auto;
-            /* Support for dashed/dotted styles if needed */
-            border-top: ${dividerStyle !== 'solid' ? dividerHeight + 'px ' + dividerStyle + ' ' + dividerColor : 'none'};
-            background-color: ${dividerStyle !== 'solid' ? 'transparent' : dividerColor};
         }
         #${widgetId} details > summary {
             list-style: none;
@@ -106,6 +146,7 @@
             font-style: ${questionItalic ? 'italic' : 'normal'};
             text-align: ${questionAlign};
             margin: 0;
+            margin-bottom: ${questionMarginBottom}px;
             flex: 1;
             transition: color 0.2s;
         }
@@ -136,15 +177,20 @@
     `;
     document.head.appendChild(style);
 
-    // Create Title (H2)
+    // Create Title
     {% if widget.name %}
-    const title = document.createElement('h2');
+    const title = document.createElement(titleTag);
+    title.className = 'bnnr_faq_title';
     title.textContent = '{{ widget.name|e("js") }}';
-    title.style.fontSize = '1.5rem';
-    title.style.fontWeight = 'bold';
-    title.style.marginBottom = '24px';
-    title.style.color = '{{ widget.questionColor|default("#111827") }}';
     container.appendChild(title);
+    {% endif %}
+
+    // Create Subtitle
+    {% if widget.subtitleText %}
+    const subtitle = document.createElement(subtitleTag);
+    subtitle.className = 'bnnr_faq_subtitle';
+    subtitle.textContent = '{{ widget.subtitleText|e("js") }}';
+    container.appendChild(subtitle);
     {% endif %}
 
     // Render questions

@@ -180,6 +180,23 @@
             line-height: 1.5 !important;
             flex-grow: 1 !important;
             text-decoration: none !important;
+            text-decoration: none !important;
+        }
+
+        .bnnr_prod_desc {
+            font-size: ${options.descriptionSize || '14px'} !important;
+            font-weight: ${options.descriptionBold ? '700' : '400'} !important;
+            font-style: ${options.descriptionItalic ? 'italic' : 'normal'} !important;
+            font-family: ${options.descriptionFont || 'inherit'} !important;
+            color: ${options.descriptionColor || '#4b5563'} !important;
+            text-align: ${options.descriptionAlign || 'center'} !important;
+            margin-top: ${options.descriptionMarginTop || 0}px !important;
+            margin-bottom: ${options.descriptionMarginBottom !== undefined ? options.descriptionMarginBottom : 12}px !important;
+            line-height: 1.625 !important;
+            overflow: hidden !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 4 !important;
+            -webkit-box-orient: vertical !important;
         }
 
         .bnnr_prod_price {
@@ -566,18 +583,33 @@
         }
     }
 
+    function truncateText(text, length) {
+        if (!text) return '';
+        if (text.length <= length) return text;
+        return text.substring(0, length) + '...';
+    }
+
     function renderCard(product) {
+        const descEnabled = options.descriptionEnabled;
+        const descTag = options.descriptionTag || 'p';
+        const truncateLen = options.descriptionTruncateLength || 100;
+        const rawDesc = product.description || '';
+        const finalDesc = truncateText(rawDesc, truncateLen);
+
+        const descHTML = descEnabled ? '<' + descTag + ' class="bnnr_prod_desc">' + finalDesc + '</' + descTag + '>' : '';
+
         return `
-            <div class="bnnr_prod_card">
+            <a href="${product.url}" target="_blank" rel="noopener noreferrer" class="bnnr_prod_card">
                 <div class="bnnr_img_wrapper">
                     <img src="${product.imgUrl || '/placeholder.png'}" alt="${product.productName}" loading="lazy">
                 </div>
                 <div class="bnnr_prod_title" title="${product.productName.replace(/"/g, '&quot;')}">${product.productName}</div>
+                ${descHTML}
                 <div class="bnnr_prod_price">${formatPrice(product.priceVat, options.priceFormat || 'comma')} Kč</div>
-                <a href="${product.url}" target="_blank" rel="noopener noreferrer" class="bnnr_buy_btn">
+                <div class="bnnr_buy_btn">
                     ${options.buttonText || 'Koupit'}
-                </a>
-            </div>
+                </div>
+            </a>
         `;
     }
 

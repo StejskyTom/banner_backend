@@ -15,6 +15,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
+use App\Entity\Product;
+use App\Heureka\Infrastructure\DTO\Request\UpdateProductRequest;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/api/heureka')]
@@ -26,6 +29,7 @@ class ProductController extends AbstractController
         MessageBusInterface $messageBus,
         private ProductRepository $productRepository,
         private CategoryRepository $categoryRepository,
+        private EntityManagerInterface $entityManager,
     ) {
         $this->messageBus = $messageBus;
     }
@@ -140,5 +144,27 @@ class ProductController extends AbstractController
         $products = $this->productRepository->searchByUser($user, $search, $limit);
 
         return $this->json(['products' => $products], 200, [], ['groups' => ['product:read']]);
+    }
+    #[Route('/products/{id}', name: 'api_heureka_product_update', methods: ['PUT'])]
+    public function updateProduct(
+        #[MapEntity] Product $product,
+        #[MapRequestPayload] UpdateProductRequest $request
+    ): JsonResponse {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (!$user || $product->getFeed()->getUser() !== $user) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if ($request->productName !== null) {
+            $product->setProductName($request->productName);
+        }
+        if ($request->description !== null) {
+            $product->setDescription($request->description);
+        }
+        $this->entityManager->flush();
+
+        return $this->json($product, 200, [], ['groups' => ['product:read']]);
     }
 }

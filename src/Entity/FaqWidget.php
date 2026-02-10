@@ -616,4 +616,263 @@ class FaqWidget
 
         return $this;
     }
+
+    // Title styling properties
+    #[ORM\Column(length: 10, nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?string $titleTag = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?string $titleColor = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?string $titleSize = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?string $titleFont = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?bool $titleBold = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?bool $titleItalic = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?string $titleAlign = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?int $titleMarginBottom = null;
+
+    // Subtitle styling properties
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?string $subtitleText = null;
+
+    #[ORM\Column(length: 10, nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?string $subtitleTag = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?string $subtitleColor = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?string $subtitleSize = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?string $subtitleFont = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?bool $subtitleBold = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?bool $subtitleItalic = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?string $subtitleAlign = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['faq_widget:read', 'faq_widget:write'])]
+    private ?int $subtitleMarginBottom = null;
+
+    // Title Getters/Setters
+    public function getTitleTag(): ?string
+    {
+        return $this->titleTag;
+    }
+
+    public function setTitleTag(?string $titleTag): static
+    {
+        $this->titleTag = $titleTag;
+        return $this;
+    }
+
+    public function getTitleColor(): ?string
+    {
+        return $this->titleColor;
+    }
+
+    public function setTitleColor(?string $titleColor): static
+    {
+        $this->titleColor = $titleColor;
+        return $this;
+    }
+
+    public function getTitleSize(): ?string
+    {
+        return $this->titleSize;
+    }
+
+    public function setTitleSize(?string $titleSize): static
+    {
+        $this->titleSize = $titleSize;
+        return $this;
+    }
+
+    public function getTitleFont(): ?string
+    {
+        return $this->titleFont;
+    }
+
+    public function setTitleFont(?string $titleFont): static
+    {
+        $this->titleFont = $titleFont;
+        return $this;
+    }
+
+    public function isTitleBold(): ?bool
+    {
+        return $this->titleBold;
+    }
+
+    public function setTitleBold(?bool $titleBold): static
+    {
+        $this->titleBold = $titleBold;
+        return $this;
+    }
+
+    public function isTitleItalic(): ?bool
+    {
+        return $this->titleItalic;
+    }
+
+    public function setTitleItalic(?bool $titleItalic): static
+    {
+        $this->titleItalic = $titleItalic;
+        return $this;
+    }
+
+    public function getTitleAlign(): ?string
+    {
+        return $this->titleAlign;
+    }
+
+    public function setTitleAlign(?string $titleAlign): static
+    {
+        $this->titleAlign = $titleAlign;
+        return $this;
+    }
+
+    public function getTitleMarginBottom(): ?int
+    {
+        return $this->titleMarginBottom;
+    }
+
+    public function setTitleMarginBottom(?int $titleMarginBottom): static
+    {
+        $this->titleMarginBottom = $titleMarginBottom;
+        return $this;
+    }
+
+    // Subtitle Getters/Setters
+    public function getSubtitleText(): ?string
+    {
+        return $this->subtitleText;
+    }
+
+    public function setSubtitleText(?string $subtitleText): static
+    {
+        $this->subtitleText = $subtitleText;
+        return $this;
+    }
+
+    public function getSubtitleTag(): ?string
+    {
+        return $this->subtitleTag;
+    }
+
+    public function setSubtitleTag(?string $subtitleTag): static
+    {
+        $this->subtitleTag = $subtitleTag;
+        return $this;
+    }
+
+    public function getSubtitleColor(): ?string
+    {
+        return $this->subtitleColor;
+    }
+
+    public function setSubtitleColor(?string $subtitleColor): static
+    {
+        $this->subtitleColor = $subtitleColor;
+        return $this;
+    }
+
+    public function getSubtitleSize(): ?string
+    {
+        return $this->subtitleSize;
+    }
+
+    public function setSubtitleSize(?string $subtitleSize): static
+    {
+        $this->subtitleSize = $subtitleSize;
+        return $this;
+    }
+
+    public function getSubtitleFont(): ?string
+    {
+        return $this->subtitleFont;
+    }
+
+    public function setSubtitleFont(?string $subtitleFont): static
+    {
+        $this->subtitleFont = $subtitleFont;
+        return $this;
+    }
+
+    public function isSubtitleBold(): ?bool
+    {
+        return $this->subtitleBold;
+    }
+
+    public function setSubtitleBold(?bool $subtitleBold): static
+    {
+        $this->subtitleBold = $subtitleBold;
+        return $this;
+    }
+
+    public function isSubtitleItalic(): ?bool
+    {
+        return $this->subtitleItalic;
+    }
+
+    public function setSubtitleItalic(?bool $subtitleItalic): static
+    {
+        $this->subtitleItalic = $subtitleItalic;
+        return $this;
+    }
+
+    public function getSubtitleAlign(): ?string
+    {
+        return $this->subtitleAlign;
+    }
+
+    public function setSubtitleAlign(?string $subtitleAlign): static
+    {
+        $this->subtitleAlign = $subtitleAlign;
+        return $this;
+    }
+
+    public function getSubtitleMarginBottom(): ?int
+    {
+        return $this->subtitleMarginBottom;
+    }
+
+    public function setSubtitleMarginBottom(?int $subtitleMarginBottom): static
+    {
+        $this->subtitleMarginBottom = $subtitleMarginBottom;
+        return $this;
+    }
 }
