@@ -58,6 +58,7 @@ class AuthorWidgetController extends AbstractController
         if (isset($data['nameColor'])) $widget->setNameColor($data['nameColor']);
         if (isset($data['bioColor'])) $widget->setBioColor($data['bioColor']);
         if (isset($data['titleColor'])) $widget->setTitleColor($data['titleColor']);
+        if (array_key_exists('settings', $data)) $widget->setSettings($data['settings']);
 
         $this->entityManager->persist($widget);
         $this->entityManager->flush();
@@ -115,6 +116,7 @@ class AuthorWidgetController extends AbstractController
         if (isset($data['nameColor'])) $widget->setNameColor($data['nameColor']);
         if (isset($data['bioColor'])) $widget->setBioColor($data['bioColor']);
         if (isset($data['titleColor'])) $widget->setTitleColor($data['titleColor']);
+        if (array_key_exists('settings', $data)) $widget->setSettings($data['settings']);
         
         $widget->setUpdatedAt(new \DateTimeImmutable());
 

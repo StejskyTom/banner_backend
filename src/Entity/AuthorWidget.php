@@ -80,6 +80,10 @@ class AuthorWidget
     #[Groups(['author_widget:read', 'author_widget:write'])]
     private ?string $titleColor = null;
 
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    #[Groups(['author_widget:read', 'author_widget:write'])]
+    private ?array $settings = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -231,6 +235,18 @@ class AuthorWidget
     public function setTitleColor(?string $titleColor): static
     {
         $this->titleColor = $titleColor;
+
+        return $this;
+    }
+
+    public function getSettings(): ?array
+    {
+        return $this->settings;
+    }
+
+    public function setSettings(?array $settings): static
+    {
+        $this->settings = $settings;
 
         return $this;
     }

@@ -1,5 +1,6 @@
 (function() {
     const widgetId = 'author-widget-{{ widget.id }}';
+    {% set s = widget.settings ?? {} %}
     
     // Create container
     const container = document.createElement('div');
@@ -27,24 +28,34 @@
             flex-shrink: 0;
         }
         #${widgetId} .bnnr_auth_name {
-            font-size: 24px;
-            font-weight: 700;
-            color: {{ widget.nameColor|default('#111827') }};
-            margin: 0 0 8px 0;
+            font-size: {{ s.nameSize|default('24px') }};
+            font-weight: {{ s.nameBold is defined and s.nameBold == false ? 'normal' : '700' }};
+            font-style: {{ s.nameItalic|default(false) ? 'italic' : 'normal' }};
+            font-family: {{ s.nameFont|default('sans-serif') }};
+            text-align: {{ s.nameAlign|default('center') }};
+            color: {{ s.nameColor|default(widget.nameColor|default('#111827')) }};
+            margin: 0 0 {{ s.nameMarginBottom|default(8) }}px 0;
         }
         #${widgetId} .bnnr_auth_title {
-            font-size: 16px;
-            font-weight: 500;
-            color: {{ widget.titleColor|default('#4f46e5') }};
-            margin: 0 0 20px 0;
+            font-size: {{ s.positionSize|default('14px') }};
+            font-weight: {{ s.positionBold|default(false) ? 'bold' : '500' }};
+            font-style: {{ s.positionItalic|default(false) ? 'italic' : 'normal' }};
+            font-family: {{ s.positionFont|default('sans-serif') }};
+            text-align: {{ s.positionAlign|default('center') }};
+            color: {{ s.positionColor|default(widget.titleColor|default('#4f46e5')) }};
+            margin: 0 0 {{ s.positionMarginBottom|default(20) }}px 0;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.05em;
         }
         #${widgetId} .bnnr_auth_bio {
-            font-size: 16px;
+            font-size: {{ s.bioSize|default('16px') }};
+            font-weight: {{ s.bioBold|default(false) ? 'bold' : 'normal' }};
+            font-style: {{ s.bioItalic|default(false) ? 'italic' : 'normal' }};
+            font-family: {{ s.bioFont|default('sans-serif') }};
+            text-align: {{ s.bioAlign|default('center') }};
             line-height: 1.6;
-            color: {{ widget.bioColor|default('#4b5563') }};
-            margin: 0;
+            color: {{ s.bioColor|default(widget.bioColor|default('#4b5563')) }};
+            margin: 0 0 {{ s.bioMarginBottom|default(0) }}px 0;
         }
 
         /* Side-by-side Layout */
@@ -62,6 +73,15 @@
         #${widgetId}.bnnr_layout_side .bnnr_auth_content {
             flex: 1;
         }
+        #${widgetId}.bnnr_layout_side .bnnr_auth_name {
+            text-align: {{ s.nameAlign|default('left') }};
+        }
+        #${widgetId}.bnnr_layout_side .bnnr_auth_title {
+            text-align: {{ s.positionAlign|default('left') }};
+        }
+        #${widgetId}.bnnr_layout_side .bnnr_auth_bio {
+            text-align: {{ s.bioAlign|default('left') }};
+        }
         
         @media (max-width: 600px) {
             #${widgetId}.bnnr_layout_side {
@@ -74,6 +94,10 @@
         }
     `;
     document.head.appendChild(style);
+
+    {% set nameTag = s.nameTag|default('h3') %}
+    {% set positionTag = s.positionTag|default('div') %}
+    {% set bioTag = s.bioTag|default('p') %}
 
     // Content
     let contentHtml = '';
@@ -88,15 +112,15 @@
         
         contentHtml += '<div class="bnnr_auth_content">';
         {% if widget.authorName %}
-        contentHtml += `<h3 class="bnnr_auth_name">{{ widget.authorName|e('html') }}</h3>`;
+        contentHtml += `<{{ nameTag }} class="bnnr_auth_name">{{ widget.authorName|e('html') }}</{{ nameTag }}>`;
         {% endif %}
         
         {% if widget.authorTitle %}
-        contentHtml += `<div class="bnnr_auth_title">{{ widget.authorTitle|e('html') }}</div>`;
+        contentHtml += `<{{ positionTag }} class="bnnr_auth_title">{{ widget.authorTitle|e('html') }}</{{ positionTag }}>`;
         {% endif %}
         
         {% if widget.authorBio %}
-        contentHtml += `<p class="bnnr_auth_bio">{{ widget.authorBio|nl2br|e('js') }}</p>`;
+        contentHtml += `<{{ bioTag }} class="bnnr_auth_bio">{{ widget.authorBio|nl2br|e('js') }}</{{ bioTag }}>`;
         {% endif %}
         contentHtml += '</div>';
         
@@ -107,15 +131,15 @@
         {% endif %}
         
         {% if widget.authorName %}
-        contentHtml += `<h3 class="bnnr_auth_name">{{ widget.authorName|e('html') }}</h3>`;
+        contentHtml += `<{{ nameTag }} class="bnnr_auth_name">{{ widget.authorName|e('html') }}</{{ nameTag }}>`;
         {% endif %}
         
         {% if widget.authorTitle %}
-        contentHtml += `<div class="bnnr_auth_title">{{ widget.authorTitle|e('html') }}</div>`;
+        contentHtml += `<{{ positionTag }} class="bnnr_auth_title">{{ widget.authorTitle|e('html') }}</{{ positionTag }}>`;
         {% endif %}
         
         {% if widget.authorBio %}
-        contentHtml += `<p class="bnnr_auth_bio">{{ widget.authorBio|nl2br|e('js') }}</p>`;
+        contentHtml += `<{{ bioTag }} class="bnnr_auth_bio">{{ widget.authorBio|nl2br|e('js') }}</{{ bioTag }}>`;
         {% endif %}
     }
 
